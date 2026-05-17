@@ -1,68 +1,19 @@
 {
   "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
-  "version": "0.1",
-  "name": "codex-default",
-  "description": "OATP toolset for Codex CLI. Allows file operations, read-only git, and shell exec within project scope. Bans global installs and destructive filesystem ops.",
-  "tools": [
-    {
-      "id": "rg-search",
-      "command": "rg",
-      "description": "Ripgrep file search.",
-      "args_pattern": {
-        "deny": "--(write|replace|passthru)"
-      },
-      "timeout": 30
-    },
-    {
-      "id": "find-read",
-      "command": "find",
-      "description": "Filesystem find. Read-only, scoped to project.",
-      "args_pattern": {
-        "deny": "(-delete|-exec\\s+rm|-exec\\s+mv)"
-      },
-      "cwd_constraint": "^(/Users|/home|/workspace)",
-      "timeout": 30
-    },
-    {
-      "id": "git-read",
-      "command": "git",
-      "description": "Read-only git operations.",
-      "args_pattern": {
-        "allow": "^(status|diff|log|show|blame|branch|remote|tag|shortlog|describe|rev-parse|ls-files|ls-tree)(\\s|$)"
-      },
-      "timeout": 30
-    },
-    {
-      "id": "node-script",
-      "command": "node",
-      "description": "Node.js script execution.",
-      "args_pattern": {
-        "deny": "--eval"
-      },
-      "timeout": 60
-    },
-    {
-      "id": "python-script",
-      "command": "python3",
-      "description": "Python script execution.",
-      "args_pattern": {
-        "deny": "-c\\s"
-      },
-      "timeout": 60
-    },
-    {
-      "id": "mise-run",
-      "command": "mise",
-      "description": "mise task runner.",
-      "args_pattern": {
-        "allow": "^(run|exec|tasks)(\\s|$)"
-      },
-      "timeout": 120
-    }
-  ],
+  "toolset_name": "codex-default",
+  "version": "0.1.0",
+  "description": "OATP toolset for Codex CLI agents. Flat tool list, full phase gating and capability negotiation, explicit deny policies.",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": true,
+    "state_attestation": false
+  },
+  "phases": ["reconnaissance", "surgery", "instrumentation"],
   "policies": {
     "default_action": "deny",
-    "default_timeout": 60,
+    "allow": ["rg-search", "find-read", "git-read", "node-script", "python-script", "mise-run", "git-diff-verify"],
+    "deny": ["npm-global", "pip-install", "brew-install", "cargo-install"],
     "banned_patterns": [
       "npm\\s+(install|i)\\s+(-g|--global)",
       "pip\\s+install(?!\\s+(-r|--requirement))",
@@ -74,31 +25,67 @@
       "chmod\\s+777",
       "curl\\s+.*\\|\\s*(ba)?sh",
       "wget\\s+.*\\|\\s*(ba)?sh"
-    ],
-    "path_denylist": [
-      "~/.ssh/**",
-      "~/.gnupg/**",
-      "/etc/passwd",
-      "/etc/shadow"
     ]
   },
-  "instrumentation": {
-    "trace_events": true,
-    "event_sink": "~/.local/share/oatp/codex.jsonl",
-    "redact_secrets": true
-  },
-  "redaction": {
-    "patterns": [
-      {
-        "name": "api-key",
-        "regex": "(sk-|ghp_|gho_|AKIA)[A-Za-z0-9_\\-]{16,}",
-        "replacement": "[REDACTED:api-key]"
-      },
-      {
-        "name": "env-secret",
-        "regex": "(?i)(password|secret|token|api_key)\\s*=\\s*\\S+",
-        "replacement": "[REDACTED:secret]"
-      }
-    ]
-  }
+  "tools": [
+    {
+      "name": "rg-search",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "description": "Ripgrep file search.",
+      "binary_repo": "https://github.com/BurntSushi/ripgrep",
+      "operational_constraints": ["read-only"],
+      "required": true
+    },
+    {
+      "name": "find-read",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "description": "Filesystem find. Read-only.",
+      "operational_constraints": ["read-only", "no exec"]
+    },
+    {
+      "name": "git-read",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic",
+      "description": "Read-only git operations.",
+      "operational_constraints": ["read-only"]
+    },
+    {
+      "name": "node-script",
+      "phase": "surgery",
+      "category": "logic-substrate",
+      "verification_mode": "heuristic",
+      "description": "Node.js script execution for transformation tasks.",
+      "operational_constraints": ["no network", "project-local only"]
+    },
+    {
+      "name": "python-script",
+      "phase": "surgery",
+      "category": "logic-substrate",
+      "verification_mode": "heuristic",
+      "description": "Python script execution for transformation tasks.",
+      "operational_constraints": ["no network", "project-local only"]
+    },
+    {
+      "name": "mise-run",
+      "phase": "surgery",
+      "category": "config-substrate",
+      "verification_mode": "heuristic",
+      "description": "Task runner for project build and test tasks.",
+      "operational_constraints": ["project-local only"]
+    },
+    {
+      "name": "git-diff-verify",
+      "phase": "instrumentation",
+      "category": "merge-diff",
+      "verification_mode": "deterministic",
+      "description": "Verify changes via git diff before commit.",
+      "operational_constraints": ["read-only"],
+      "required": true
+    }
+  ]
 }

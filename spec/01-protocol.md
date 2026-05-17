@@ -101,3 +101,11 @@ The Adapter MUST NOT return exit code 0 for any denied or errored invocation.
 ## 5. Redaction
 
 If `instrumentation.redact_secrets` is `true`, the Adapter MUST apply redaction to stdout and stderr before returning them to the Agent. Redaction patterns are defined in the `redaction` block of the registry. The Adapter MUST substitute matched content with `[REDACTED]` and MUST increment the `redactions` counter in the emitted trace event. The Adapter MUST NOT log or emit the unredacted content.
+
+## 6. Relation to A2A
+
+OATP is complementary to Agent-to-Agent (A2A) protocols. A2A standardizes how agents discover and message each other; it deliberately leaves agent-internal tool discipline unspecified. OATP fills that gap.
+
+An A2A-compliant agent SHOULD advertise its OATP registry at `/.well-known/toolset.json` so peer agents can reason about which disciplines, phases, and verification modes the agent enforces internally before delegating work to it. This is the same well-known discovery pattern A2A uses for agent cards, applied to tool contracts rather than messaging capabilities.
+
+OATP does not require A2A, and A2A does not require OATP. When used together, OATP governs intra-agent tool discipline; A2A governs inter-agent communication. The boundary is the agent's own tool invocation layer.

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "my-agent",
+  "version": "0.1.0",
+  "description": "Sample OATP toolset configuration. Copy and modify for your project.",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": false,
+    "state_attestation": false
+  },
+  "phases": ["reconnaissance", "surgery", "instrumentation"],
+  "policies": {
+    "default_action": "deny",
+    "allow": ["rg", "sg", "git-status", "git-log", "git-diff", "edit", "difftastic"],
+    "deny": ["npm", "pip", "pip3", "brew", "cargo-install"],
+    "banned_patterns": [
+      "rm\\s+-rf\\s+/",
+      "sudo\\s+",
+      "curl\\s+.*\\|\\s*(ba)?sh"
+    ]
+  },
+  "toolsets": [
+    {
+      "toolset_name": "recon",
+      "version": "0.1.0",
+      "description": "Read-only exploration. Phase: reconnaissance.",
+      "phases": ["reconnaissance"],
+      "tools": [
+        {
+          "name": "sg",
+          "phase": "reconnaissance",
+          "category": "syntax-match-rewrite",
+          "verification_mode": "deterministic",
+          "description": "Structural code search.",
+          "operational_constraints": ["read-only"],
+          "required": true
+        },
+        {
+          "name": "rg",
+          "phase": "reconnaissance",
+          "category": "index-search",
+          "verification_mode": "deterministic",
+          "description": "File search by path or literal text.",
+          "operational_constraints": ["read-only"]
+        },
+        {
+          "name": "git-status",
+          "phase": "reconnaissance",
+          "category": "navigation",
+          "verification_mode": "deterministic",
+          "description": "Show working tree status.",
+          "operational_constraints": ["read-only"]
+        },
+        {
+          "name": "git-log",
+          "phase": "reconnaissance",
+          "category": "navigation",
+          "verification_mode": "deterministic",
+          "description": "Show commit log.",
+          "operational_constraints": ["read-only"]
+        }
+      ]
+    },
+    {
+      "toolset_name": "surgery",
+      "version": "0.1.0",
+      "description": "Targeted mutation. Phase: surgery.",
+      "phases": ["surgery"],
+      "tools": [
+        {
+          "name": "edit",
+          "phase": "surgery",
+          "category": "structural-edit",
+          "verification_mode": "deterministic",
+          "description": "Apply targeted file edits."
+        },
+        {
+          "name": "git-diff",
+          "phase": "surgery",
+          "category": "merge-diff",
+          "verification_mode": "deterministic",
+          "description": "Show staged or unstaged changes.",
+          "operational_constraints": ["read-only"]
+        }
+      ]
+    },
+    {
+      "toolset_name": "instrumentation",
+      "version": "0.1.0",
+      "description": "Verification. Phase: instrumentation.",
+      "phases": ["instrumentation"],
+      "tools": [
+        {
+          "name": "difftastic",
+          "phase": "instrumentation",
+          "category": "merge-diff",
+          "verification_mode": "deterministic",
+          "description": "Syntax-aware structural diff.",
+          "operational_constraints": ["read-only"],
+          "required": true
+        }
+      ]
+    },
+    {
+      "$ref": "oatp:builtin/safe-defaults"
+    }
+  ]
+}

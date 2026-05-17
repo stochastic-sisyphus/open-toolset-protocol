@@ -2,194 +2,259 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
   "title": "OATP Toolset Registry",
-  "description": "Schema for toolsets.json — the Open Toolset Protocol registry declaring allowed tools, policies, and instrumentation configuration.",
+  "description": "Schema for toolsets.json — the Open Agent Toolset Protocol registry declaring allowed tools, phases, capabilities, and instrumentation configuration.",
   "type": "object",
-  "required": ["version", "name", "tools"],
+  "required": ["toolset_name", "version"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string",
       "description": "JSON Schema URI for this document."
     },
-    "version": {
-      "type": "string",
-      "description": "OATP spec version this registry targets. Format: '0.x'.",
-      "pattern": "^\\d+\\.\\d+$"
-    },
-    "name": {
+    "toolset_name": {
       "type": "string",
       "description": "Human-readable name for this toolset.",
       "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver string for this registry.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "description": {
       "type": "string",
       "description": "Short description of the toolset's purpose."
     },
+    "manifesto_ref": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI pointing to the manifesto or governing spec for this toolset."
+    },
+    "capabilities": {
+      "$ref": "#/$defs/capabilities"
+    },
+    "phases": {
+      "type": "array",
+      "description": "Phase names this toolset participates in.",
+      "items": {
+        "type": "string",
+        "enum": ["reconnaissance", "surgery", "instrumentation"]
+      },
+      "uniqueItems": true
+    },
     "tools": {
       "type": "array",
-      "description": "Array of tool definitions.",
+      "description": "Leaf tool definitions.",
       "items": {
         "$ref": "#/$defs/tool"
       }
     },
+    "toolsets": {
+      "type": "array",
+      "description": "Nested toolset definitions (self-registry / composability).",
+      "items": {
+        "$ref": "#/$defs/nested_toolset"
+      }
+    },
     "policies": {
       "$ref": "#/$defs/policies"
-    },
-    "instrumentation": {
-      "$ref": "#/$defs/instrumentation"
-    },
-    "redaction": {
-      "$ref": "#/$defs/redaction"
     }
   },
+  "anyOf": [
+    { "required": ["tools"] },
+    { "required": ["toolsets"] }
+  ],
   "$defs": {
-    "tool": {
+    "capabilities": {
       "type": "object",
-      "required": ["id", "command"],
+      "description": "Declared conformance capabilities for this toolset.",
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for this tool entry.",
-          "minLength": 1
-        },
-        "command": {
-          "type": "string",
-          "description": "The binary or command name (e.g. 'rg', 'git').",
-          "minLength": 1
-        },
-        "description": {
-          "type": "string",
-          "description": "Human-readable description of this tool entry's purpose."
-        },
-        "args_pattern": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "allow": {
-              "type": "string",
-              "description": "Regex. Full args string MUST match for the call to be allowed."
-            },
-            "deny": {
-              "type": "string",
-              "description": "Regex. If the full args string matches, the call is denied."
-            }
-          }
-        },
-        "cwd_constraint": {
-          "type": "string",
-          "description": "Regex. The invocation's working directory MUST match."
-        },
-        "timeout": {
-          "type": "integer",
-          "description": "Maximum execution time in seconds.",
-          "minimum": 1
-        },
-        "requires_approval": {
+        "discovery": {
           "type": "boolean",
-          "description": "If true, invocation is paused pending external approval."
+          "description": "Adapter supports tool discovery queries and well-known path serving.",
+          "default": false
         },
-        "instrumentation_overrides": {
-          "type": "object",
-          "description": "Per-tool overrides for instrumentation fields.",
-          "additionalProperties": false,
-          "properties": {
-            "trace_events": {
-              "type": "boolean"
-            },
-            "event_sink": {
-              "type": "string"
-            },
-            "redact_secrets": {
-              "type": "boolean"
-            }
-          }
+        "phase_gating": {
+          "type": "boolean",
+          "description": "Adapter enforces phase_gate per tool, tracks phase transitions, and enforces required-tool satisfaction.",
+          "default": false
+        },
+        "capability_negotiation": {
+          "type": "boolean",
+          "description": "Adapter and agent exchange and validate capabilities blocks at session start.",
+          "default": false
+        },
+        "state_attestation": {
+          "type": "boolean",
+          "description": "Adapter enforces structured instrumented_return contracts on surgery and instrumentation tools.",
+          "default": false
+        },
+        "gps_protocol": {
+          "type": "boolean",
+          "description": "Adapter enforces the GPS sub-sequence (locate -> map -> instrument) within the reconnaissance phase.",
+          "default": false
         }
       }
     },
     "policies": {
       "type": "object",
+      "description": "Global policy rules applied to all invocations.",
       "additionalProperties": false,
       "properties": {
         "default_action": {
           "type": "string",
           "enum": ["allow", "deny"],
-          "description": "Action for invocations that match no tool entry. Default: 'deny'."
+          "description": "Action for invocations that match no explicit allow/deny entry. Default: 'deny'.",
+          "default": "deny"
         },
-        "default_timeout": {
-          "type": "integer",
-          "description": "Default timeout in seconds for all tools unless overridden.",
-          "minimum": 1
+        "allow": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool names or glob patterns explicitly permitted. Evaluated before deny. Globs match tool name, not command line."
+        },
+        "deny": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool names or glob patterns explicitly forbidden. Always wins on conflict with allow."
         },
         "banned_patterns": {
           "type": "array",
-          "description": "Regex patterns matched against full command string. Any match causes immediate denial.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "path_allowlist": {
-          "type": "array",
-          "description": "Glob patterns. File path arguments MUST match at least one entry if this list is non-empty.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "path_denylist": {
-          "type": "array",
-          "description": "Glob patterns. File path arguments MUST NOT match any entry.",
-          "items": {
-            "type": "string"
-          }
+          "items": { "type": "string" },
+          "description": "Regex patterns matched against the full command line (name + args). Any match causes immediate denial."
         }
       }
     },
-    "instrumentation": {
+    "tool": {
       "type": "object",
+      "required": ["name", "phase", "category", "verification_mode"],
       "additionalProperties": false,
       "properties": {
-        "trace_events": {
-          "type": "boolean",
-          "description": "Emit trace events. Default: true."
-        },
-        "event_sink": {
+        "name": {
           "type": "string",
-          "description": "Where to emit events: 'stdout', 'stderr', a file path, or an HTTP URL. Default: 'stdout'."
+          "description": "Unique name for this tool entry.",
+          "minLength": 1
         },
-        "redact_secrets": {
+        "phase": {
+          "type": "string",
+          "enum": ["reconnaissance", "surgery", "instrumentation", "any"],
+          "description": "When in the GPS sequence this tool runs. Use 'any' for tools that may run in any phase."
+        },
+        "category": {
+          "type": "string",
+          "description": "What kind of tool this is. Open vocabulary — canonical values include: navigation, syntax-match-rewrite, semantic-query, transform-at-scale, merge-diff, index-search, semantic-search, cross-reference, config-substrate, logic-substrate, verification, synthesis-smt, datalog-logic, structural-edit."
+        },
+        "verification_mode": {
+          "type": "string",
+          "enum": ["deterministic", "heuristic", "none"],
+          "description": "How the tool's output can be verified."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of this tool's purpose."
+        },
+        "binary_repo": {
+          "type": "string",
+          "description": "Upstream source URL for the tool binary."
+        },
+        "operational_constraints": {
+          "type": "array",
+          "description": "Normative constraints on usage (e.g. 'read-only', 'no network', 'single-file scope').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "instrumented_return": {
+          "$ref": "#/$defs/instrumented_return"
+        },
+        "required": {
           "type": "boolean",
-          "description": "Apply redaction rules before returning stdout/stderr. Default: false."
+          "description": "If true, this tool MUST be invoked at least once per phase before phase exit is permitted.",
+          "default": false
+        },
+        "requires_prior": {
+          "type": "array",
+          "description": "List of tool names or category references (prefix 'category:') that MUST have been invoked in the current phase trace before this tool may run. ANY entry satisfies the precondition (logical OR).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gps_step": {
+          "type": "string",
+          "enum": ["locate", "map", "instrument"],
+          "description": "Optional GPS sub-step within reconnaissance phase. Only enforced when capabilities.gps_protocol is true."
+        },
+        "requires_approval": {
+          "type": "boolean",
+          "description": "If true, invocation is paused pending external approval."
         }
       }
     },
-    "redaction": {
+    "instrumented_return": {
       "type": "object",
+      "required": ["required"],
       "additionalProperties": false,
       "properties": {
-        "patterns": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name", "regex"],
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Identifier for this redaction rule.",
-                "minLength": 1
-              },
-              "regex": {
-                "type": "string",
-                "description": "Pattern to match in stdout/stderr."
-              },
-              "replacement": {
-                "type": "string",
-                "description": "Replacement text. Default: '[REDACTED]'."
-              }
-            }
-          }
+        "required": {
+          "type": "boolean",
+          "description": "If true, the adapter MUST reject results that do not match schema_ref."
+        },
+        "schema_ref": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI pointing to the JSON Schema the tool's return value MUST satisfy."
         }
       }
+    },
+    "nested_toolset": {
+      "type": "object",
+      "required": ["toolset_name", "version"],
+      "description": "A nested toolset definition. Same structure as the root toolset. Identified by presence of toolset_name.",
+      "additionalProperties": false,
+      "properties": {
+        "toolset_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "manifesto_ref": {
+          "type": "string",
+          "format": "uri"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/capabilities"
+        },
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["reconnaissance", "surgery", "instrumentation"]
+          },
+          "uniqueItems": true
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tool"
+          }
+        },
+        "toolsets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nested_toolset"
+          }
+        }
+      },
+      "anyOf": [
+        { "required": ["tools"] },
+        { "required": ["toolsets"] }
+      ]
     }
   }
 }

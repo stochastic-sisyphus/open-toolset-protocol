@@ -1,89 +1,150 @@
 {
   "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
-  "version": "0.1",
-  "name": "claude-code-default",
-  "description": "OATP toolset for Claude Code. Allows structural code search, read-only git, and mise. Bans package manager global installs.",
-  "tools": [
-    {
-      "id": "sg-search",
-      "command": "sg",
-      "description": "ast-grep structural code search and pattern matching.",
-      "timeout": 60
-    },
-    {
-      "id": "qi-search",
-      "command": "qi",
-      "description": "Natural language code search.",
-      "timeout": 60
-    },
-    {
-      "id": "rg-search",
-      "command": "rg",
-      "description": "Ripgrep file search. Filesystem path lookup only, not code analysis.",
-      "args_pattern": {
-        "deny": "--(write|replace|passthru)"
-      },
-      "timeout": 30
-    },
-    {
-      "id": "git-read",
-      "command": "git",
-      "description": "Read-only git operations: status, diff, log, show, blame.",
-      "args_pattern": {
-        "allow": "^(status|diff|log|show|blame|branch|remote|tag|stash list|shortlog|describe|rev-parse|ls-files|ls-tree)(\\s|$)"
-      },
-      "timeout": 30
-    },
-    {
-      "id": "mise-run",
-      "command": "mise",
-      "description": "mise task runner and tool version manager.",
-      "args_pattern": {
-        "deny": "--(global|system)"
-      },
-      "timeout": 120
-    },
-    {
-      "id": "cymbal",
-      "command": "cymbal",
-      "description": "Code navigation, symbol index, call graphs, impact analysis.",
-      "timeout": 60
-    }
-  ],
+  "toolset_name": "claude-code-default",
+  "version": "0.1.0",
+  "description": "OATP toolset for Claude Code agents. Nested sub-toolsets per phase, required-tool enforcement, full capabilities, explicit allow/deny policies.",
+  "manifesto_ref": "https://github.com/stochastic-sisyphus/open-toolset-protocol/blob/main/manifesto.md",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": true,
+    "state_attestation": true
+  },
+  "phases": ["reconnaissance", "surgery", "instrumentation"],
   "policies": {
     "default_action": "deny",
-    "default_timeout": 60,
+    "allow": ["sg", "qi", "rg", "git-read", "git-diff", "git-log", "mise", "nav-tool", "difftastic"],
+    "deny": ["npm", "pip", "pip3", "brew", "cargo-install", "gem", "go-install"],
     "banned_patterns": [
-      "npm\\s+(install|i)\\s+-g",
-      "npm\\s+(install|i)\\s+--global",
-      "pip\\s+install(?!\\s+--requirement|\\s+-r)",
-      "pip3\\s+install",
-      "brew\\s+install",
-      "brew\\s+upgrade",
-      "cargo\\s+install",
-      "gem\\s+install",
-      "go\\s+install",
+      "rm\\s+-rf\\s+/",
       "sudo\\s+",
-      "rm\\s+-rf\\s+/"
+      "npm\\s+(install|i)\\s+(-g|--global)",
+      "pip\\s+install(?!\\s+(-r|--requirement))",
+      "brew\\s+(install|upgrade)",
+      "cargo\\s+install",
+      "curl\\s+.*\\|\\s*(ba)?sh",
+      "wget\\s+.*\\|\\s*(ba)?sh"
     ]
   },
-  "instrumentation": {
-    "trace_events": true,
-    "event_sink": "~/.local/share/oatp/claude-code.jsonl",
-    "redact_secrets": true
-  },
-  "redaction": {
-    "patterns": [
-      {
-        "name": "api-key",
-        "regex": "(sk-|ghp_|gho_|xoxb-|AKIA)[A-Za-z0-9_\\-]{16,}",
-        "replacement": "[REDACTED:api-key]"
-      },
-      {
-        "name": "env-secret",
-        "regex": "(?i)(password|secret|token|api_key)\\s*=\\s*\\S+",
-        "replacement": "[REDACTED:secret]"
-      }
-    ]
-  }
+  "toolsets": [
+    {
+      "toolset_name": "recon",
+      "version": "0.1.0",
+      "description": "Read-only exploration tools. Phase: reconnaissance.",
+      "phases": ["reconnaissance"],
+      "tools": [
+        {
+          "name": "sg",
+          "phase": "reconnaissance",
+          "category": "syntax-match-rewrite",
+          "verification_mode": "deterministic",
+          "description": "ast-grep structural code search and pattern matching.",
+          "binary_repo": "https://github.com/ast-grep/ast-grep",
+          "operational_constraints": ["read-only", "no network"],
+          "required": true
+        },
+        {
+          "name": "qi",
+          "phase": "reconnaissance",
+          "category": "semantic-search",
+          "verification_mode": "heuristic",
+          "description": "Natural language code search.",
+          "operational_constraints": ["read-only"]
+        },
+        {
+          "name": "rg",
+          "phase": "reconnaissance",
+          "category": "index-search",
+          "verification_mode": "deterministic",
+          "description": "Ripgrep file search. Filesystem path lookup only.",
+          "binary_repo": "https://github.com/BurntSushi/ripgrep",
+          "operational_constraints": ["read-only"]
+        },
+        {
+          "name": "git-read",
+          "phase": "reconnaissance",
+          "category": "navigation",
+          "verification_mode": "deterministic",
+          "description": "Read-only git operations: status, diff, log, show, blame.",
+          "operational_constraints": ["read-only", "no mutations"]
+        },
+        {
+          "name": "nav-tool",
+          "phase": "reconnaissance",
+          "category": "navigation",
+          "verification_mode": "deterministic",
+          "description": "Code navigation tool: symbol index, call graphs, cross-reference. Replace with your preferred navigation tool.",
+          "operational_constraints": ["read-only"]
+        }
+      ]
+    },
+    {
+      "toolset_name": "surgery",
+      "version": "0.1.0",
+      "description": "Targeted mutation tools. Phase: surgery.",
+      "phases": ["surgery"],
+      "tools": [
+        {
+          "name": "sg-rewrite",
+          "phase": "surgery",
+          "category": "syntax-match-rewrite",
+          "verification_mode": "deterministic",
+          "description": "ast-grep structural rewrite. Single-file scope enforced.",
+          "binary_repo": "https://github.com/ast-grep/ast-grep",
+          "operational_constraints": ["single-file scope"],
+          "instrumented_return": {
+            "required": true,
+            "schema_ref": "https://open-toolset-protocol.org/schemas/returns/rewrite-result.schema.json"
+          }
+        },
+        {
+          "name": "mise",
+          "phase": "surgery",
+          "category": "config-substrate",
+          "verification_mode": "heuristic",
+          "description": "Task runner and tool version manager. Project-local tasks only.",
+          "operational_constraints": ["project-local only", "no global tasks"]
+        },
+        {
+          "name": "git-commit",
+          "phase": "surgery",
+          "category": "navigation",
+          "verification_mode": "deterministic",
+          "description": "Write git operations: add, commit, stash. No push, no force.",
+          "operational_constraints": ["no push", "no force-push", "no reset-hard"],
+          "requires_approval": true
+        }
+      ]
+    },
+    {
+      "toolset_name": "instrumentation",
+      "version": "0.1.0",
+      "description": "Verification and state emission tools. Phase: instrumentation.",
+      "phases": ["instrumentation"],
+      "tools": [
+        {
+          "name": "difftastic",
+          "phase": "instrumentation",
+          "category": "merge-diff",
+          "verification_mode": "deterministic",
+          "description": "Syntax-aware structural diff. Verifies semantic intent of changes.",
+          "binary_repo": "https://github.com/wilfred/difftastic",
+          "operational_constraints": ["read-only"],
+          "required": true,
+          "instrumented_return": {
+            "required": true,
+            "schema_ref": "https://open-toolset-protocol.org/schemas/returns/diff-result.schema.json"
+          }
+        },
+        {
+          "name": "git-diff",
+          "phase": "instrumentation",
+          "category": "merge-diff",
+          "verification_mode": "deterministic",
+          "description": "Verify working tree state matches expected post-surgery state.",
+          "operational_constraints": ["read-only"]
+        }
+      ]
+    }
+  ]
 }

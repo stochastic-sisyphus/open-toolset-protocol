@@ -82,6 +82,55 @@ When a tool has `requires_approval: true`, the Adapter:
 4. On approval: proceed with exec
 5. On denial or timeout: emit `tool.deny`, exit 2
 
+## Phase gating algorithm
+
+The Adapter MUST track `active_phase`, initialized to `reconnaissance` at session start.
+
+Phase transition is an explicit agent intent: `oatp phase --set <phase>`. The Adapter MUST process phase transitions as follows:
+
+```
+on phase_transition(from, to):
+    required_for_from = [t for t in registry.tools
+                         if t.required == true and t.phase == from]
+    satisfied = [t for t in required_for_from
+                 if t.name in trace.invoked_in_phase(from)]
+    missing = set(required_for_from) - set(satisfied)
+    if missing:
+        reject(exit=2, reason="required_tool_skipped",
+               tools=[t.name for t in missing])
+    active_phase = to
+    emit("phase.transition", from=from, to=to)
+```
+
+On each tool invocation:
+
+```
+on tool_invoke(tool_name, args):
+    tool = registry.resolve(tool_name)
+    if tool is None:
+        reject(exit=2, reason="unknown_tool")
+    if tool.phase != active_phase and tool.phase != "any":
+        reject(exit=2, reason="phase_gate_violation",
+               expected=active_phase, got=tool.phase)
+    if tool.required:
+        trace.record(active_phase, tool.name)
+    validate_args(tool, args)
+    return exec(tool, args)
+```
+
+`allowedDisciplineCategories` is a derived view: the union of `tool.category` for all tools whose `tool.phase` matches `active_phase` or is `"any"`.
+
+## Required tool enforcement
+
+A tool with `required: true` MUST be invoked at least once in its declared phase before the agent may transition to the next phase. Enforcement happens at **transition time** — when `oatp phase --set` is called, the adapter scans the phase trace log.
+
+If any required tool for the exiting phase has not been invoked, the adapter MUST:
+1. Reject the transition with exit code 2
+2. Emit reason `required_tool_skipped` with the list of missing tool names
+3. Leave `active_phase` unchanged
+
+The agent may then invoke the missing tools and retry the transition.
+
 ## Caching
 
 The Adapter SHOULD cache the loaded and validated Toolset Registry for the duration of its process lifetime to avoid repeated I/O. If the registry file changes on disk, the behavior is implementation-defined (the reference adapter does not hot-reload).

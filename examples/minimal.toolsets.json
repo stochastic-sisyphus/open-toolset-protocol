@@ -1,26 +1,29 @@
 {
   "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
-  "version": "0.1",
-  "name": "minimal",
-  "description": "Smallest valid OATP registry. Allows read-only file search with rg, denies everything else.",
-  "tools": [
-    {
-      "id": "rg-search",
-      "command": "rg",
-      "description": "Read-only file search. No write flags permitted.",
-      "args_pattern": {
-        "deny": "--(write|replace|passthru)"
-      },
-      "timeout": 30
-    }
-  ],
+  "toolset_name": "minimal",
+  "version": "0.1.0",
+  "description": "Smallest valid OATP registry. Allows read-only file search during reconnaissance, denies everything else.",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": false,
+    "state_attestation": false
+  },
+  "phases": ["reconnaissance"],
   "policies": {
     "default_action": "deny",
-    "default_timeout": 30
+    "allow": ["ls", "cat"],
+    "deny": [],
+    "banned_patterns": []
   },
-  "instrumentation": {
-    "trace_events": true,
-    "event_sink": "stdout",
-    "redact_secrets": false
-  }
+  "tools": [
+    {
+      "name": "rg-search",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "description": "Read-only file search.",
+      "operational_constraints": ["read-only"]
+    }
+  ]
 }

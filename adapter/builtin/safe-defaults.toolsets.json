@@ -1,0 +1,58 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "oatp-safe-defaults",
+  "version": "0.1.0",
+  "description": "Built-in minimal read-only reconnaissance toolset. Embedded in the adapter binary. Resolves via oatp:builtin/safe-defaults. No required tools — safe fallback for any environment.",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": false,
+    "state_attestation": false
+  },
+  "phases": ["reconnaissance"],
+  "policies": {
+    "default_action": "deny"
+  },
+  "tools": [
+    {
+      "name": "ls",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "description": "List directory contents.",
+      "operational_constraints": ["read-only"]
+    },
+    {
+      "name": "cat",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "description": "Read file contents.",
+      "operational_constraints": ["read-only", "single-file scope"]
+    },
+    {
+      "name": "git-status",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic",
+      "description": "Show working tree status.",
+      "operational_constraints": ["read-only"]
+    },
+    {
+      "name": "git-log",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic",
+      "description": "Show git commit log.",
+      "operational_constraints": ["read-only"]
+    },
+    {
+      "name": "git-diff",
+      "phase": "reconnaissance",
+      "category": "merge-diff",
+      "verification_mode": "deterministic",
+      "description": "Show unstaged or staged changes.",
+      "operational_constraints": ["read-only"]
+    }
+  ]
+}

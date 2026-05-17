@@ -34,6 +34,15 @@ Merged RFCs are canonical. The corresponding spec changes MUST land in the same 
 
 Use the next sequential 4-digit number (e.g. `0001`, `0002`). The template is `0000`.
 
+## Filed RFCs
+
+| RFC | Title | Status |
+|---|---|---|
+| [RFC 0001](0001-discipline-categories.md) | Discipline Categories | Draft |
+| [RFC 0002](0002-gps-protocol.md) | GPS Protocol | Draft |
+| [RFC 0003](0003-framework-adapters.md) | Framework Adapters | Draft |
+| [RFC 0004](0004-formal-verification.md) | Formal Verification Conformance (L5 and L6) | Draft |
+
 ## Status labels
 
 | Label | Meaning |

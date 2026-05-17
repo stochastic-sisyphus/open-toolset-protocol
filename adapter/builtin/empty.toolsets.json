@@ -1,0 +1,17 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "empty",
+  "version": "0.1.0",
+  "description": "Built-in empty toolset. No tools defined. Default deny. Used for testing adapter policy enforcement with no permitted tools. Resolves via oatp:builtin/empty.",
+  "capabilities": {
+    "discovery": true,
+    "phase_gating": true,
+    "capability_negotiation": false,
+    "state_attestation": false
+  },
+  "phases": [],
+  "policies": {
+    "default_action": "deny"
+  },
+  "tools": []
+}
