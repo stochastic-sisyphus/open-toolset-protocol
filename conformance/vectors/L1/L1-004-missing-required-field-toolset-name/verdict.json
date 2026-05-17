@@ -1,0 +1,10 @@
+{
+  "level": "L1",
+  "case_id": "L1-004-missing-required-field-toolset-name",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 3,
+    "reason": "schema_invalid"
+  },
+  "sequence": []
+}

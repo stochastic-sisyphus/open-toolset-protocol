@@ -1,0 +1,24 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "requires-prior-nav",
+  "version": "0.1.0",
+  "policies": {
+    "default_action": "allow"
+  },
+  "tools": [
+    {
+      "name": "grep",
+      "phase": "reconnaissance",
+      "category": "index-search",
+      "verification_mode": "deterministic",
+      "requires_prior": ["category:navigation"],
+      "description": "Text search — only after a navigation tool has run"
+    },
+    {
+      "name": "git-status",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic"
+    }
+  ]
+}

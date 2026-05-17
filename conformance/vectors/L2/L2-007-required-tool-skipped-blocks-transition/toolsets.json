@@ -1,0 +1,24 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "required-tool-gate",
+  "version": "0.1.0",
+  "policies": {
+    "default_action": "allow"
+  },
+  "tools": [
+    {
+      "name": "cymbal",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic",
+      "required": true,
+      "description": "Symbol index — required before leaving reconnaissance"
+    },
+    {
+      "name": "git-status",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "level": "L1",
+  "case_id": "L1-006-unknown-discipline-phase",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 3,
+    "reason": "schema_invalid"
+  },
+  "sequence": []
+}

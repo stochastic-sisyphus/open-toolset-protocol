@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-009-requires-prior-unsatisfied-rejected",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "precondition_unsatisfied"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "grep", "args": ["TODO", "src/"], "expect_reject": true }
+  ]
+}

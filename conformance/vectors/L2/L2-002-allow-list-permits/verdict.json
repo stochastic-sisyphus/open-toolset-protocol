@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-002-allow-list-permits",
+  "expected": {
+    "outcome": "accept",
+    "exit_code": 0,
+    "reason": "schema_valid"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "ls", "args": ["-la"] }
+  ]
+}

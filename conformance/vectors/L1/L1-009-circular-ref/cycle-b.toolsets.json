@@ -1,0 +1,8 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "cycle-b",
+  "version": "0.1.0",
+  "toolsets": [
+    { "$ref": "./toolsets.json" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "strict-default-deny",
+  "version": "0.1.0",
+  "policies": {
+    "default_action": "deny"
+  },
+  "tools": [
+    {
+      "name": "ast-grep",
+      "phase": "reconnaissance",
+      "category": "syntax-match-rewrite",
+      "verification_mode": "deterministic"
+    }
+  ]
+}

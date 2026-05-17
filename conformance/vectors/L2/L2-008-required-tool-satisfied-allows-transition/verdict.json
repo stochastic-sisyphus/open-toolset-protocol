@@ -1,0 +1,14 @@
+{
+  "level": "L2",
+  "case_id": "L2-008-required-tool-satisfied-allows-transition",
+  "expected": {
+    "outcome": "accept",
+    "exit_code": 0,
+    "reason": "schema_valid"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "cymbal", "args": ["index", "."] },
+    { "phase_set": "surgery" }
+  ]
+}

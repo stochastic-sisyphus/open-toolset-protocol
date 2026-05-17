@@ -1,0 +1,12 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "missing-phase",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "ast-grep",
+      "category": "syntax-match-rewrite",
+      "verification_mode": "deterministic"
+    }
+  ]
+}

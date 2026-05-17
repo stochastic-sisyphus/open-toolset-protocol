@@ -1,0 +1,8 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "parent-agent",
+  "version": "0.1.0",
+  "toolsets": [
+    { "$ref": "./child.toolsets.json" }
+  ]
+}

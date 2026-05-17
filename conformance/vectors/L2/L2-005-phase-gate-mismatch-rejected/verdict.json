@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-005-phase-gate-mismatch-rejected",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "phase_gate_violation"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "libcst", "args": ["--transform", "rename.py"], "expect_reject": true }
+  ]
+}

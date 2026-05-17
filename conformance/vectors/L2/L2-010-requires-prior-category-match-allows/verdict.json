@@ -1,0 +1,14 @@
+{
+  "level": "L2",
+  "case_id": "L2-010-requires-prior-category-match-allows",
+  "expected": {
+    "outcome": "accept",
+    "exit_code": 0,
+    "reason": "schema_valid"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "git-status", "args": [] },
+    { "invoke": "grep", "args": ["TODO", "src/"] }
+  ]
+}

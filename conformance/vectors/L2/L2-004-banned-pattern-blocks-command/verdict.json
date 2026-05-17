@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-004-banned-pattern-blocks-command",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "banned_pattern_match"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "rm", "args": ["-rf", "/tmp/work"], "expect_reject": true }
+  ]
+}

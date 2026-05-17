@@ -1,0 +1,14 @@
+{
+  "level": "L2",
+  "case_id": "L2-007-required-tool-skipped-blocks-transition",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "required_tool_skipped"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "git-status", "args": [] },
+    { "phase_set": "surgery", "expect_reject": true }
+  ]
+}

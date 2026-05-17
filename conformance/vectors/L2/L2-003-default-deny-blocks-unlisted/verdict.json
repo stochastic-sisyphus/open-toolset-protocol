@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-003-default-deny-blocks-unlisted",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "default_deny"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "ls", "args": ["-la"], "expect_reject": true }
+  ]
+}

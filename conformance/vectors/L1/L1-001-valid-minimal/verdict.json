@@ -1,0 +1,10 @@
+{
+  "level": "L1",
+  "case_id": "L1-001-valid-minimal",
+  "expected": {
+    "outcome": "accept",
+    "exit_code": 0,
+    "reason": "schema_valid"
+  },
+  "sequence": []
+}

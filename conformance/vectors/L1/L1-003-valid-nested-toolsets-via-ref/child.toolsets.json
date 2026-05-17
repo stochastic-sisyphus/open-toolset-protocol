@@ -1,0 +1,14 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "toolset_name": "recon-tools",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "git-status",
+      "phase": "reconnaissance",
+      "category": "navigation",
+      "verification_mode": "deterministic",
+      "description": "Read-only repository state inspection"
+    }
+  ]
+}

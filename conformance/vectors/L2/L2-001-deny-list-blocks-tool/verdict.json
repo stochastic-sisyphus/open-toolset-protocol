@@ -1,0 +1,13 @@
+{
+  "level": "L2",
+  "case_id": "L2-001-deny-list-blocks-tool",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "denylist_match"
+  },
+  "sequence": [
+    { "phase_set": "reconnaissance" },
+    { "invoke": "grep", "args": ["TODO", "src/"], "expect_reject": true }
+  ]
+}
