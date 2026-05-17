@@ -1,0 +1,22 @@
+{
+  "level": "L2",
+  "case_id": "L2-004-forbidden-args-blocks-command",
+  "expected": {
+    "outcome": "reject",
+    "exit_code": 2,
+    "reason": "forbidden_args_match"
+  },
+  "sequence": [
+    {
+      "phase_set": "reconnaissance"
+    },
+    {
+      "invoke": "rm",
+      "args": [
+        "-rf",
+        "/tmp/work"
+      ],
+      "expect_reject": true
+    }
+  ]
+}

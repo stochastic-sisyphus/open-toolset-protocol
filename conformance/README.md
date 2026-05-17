@@ -22,7 +22,7 @@ Current coverage:
 | Level | Cases | What they cover |
 |---|---|---|
 | L1 | 9 | Schema validation: required fields, version format, phase enum, `$ref` resolution, cycle detection |
-| L2 | 10 | Policy order (deny → banned_patterns → allow → default), phase gating, required-tool tracking at transition, `requires_prior` preconditions |
+| L2 | 10 | Policy order (deny → forbidden_args → allow → default), phase gating, required-tool tracking at transition, `requires_prior` preconditions, priority-based category substitution |
 
 ## Running vectors
 

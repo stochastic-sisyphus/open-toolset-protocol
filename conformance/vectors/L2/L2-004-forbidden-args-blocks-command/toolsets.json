@@ -1,11 +1,21 @@
 {
   "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
-  "toolset_name": "bad-phase",
+  "toolset_name": "ban-rm-rf",
   "version": "0.1.0",
+  "policies": {
+    "default_action": "allow",
+    "forbidden_args": [
+      [
+        "rm",
+        "-rf",
+        "/tmp/work"
+      ]
+    ]
+  },
   "tools": [
     {
       "name": "rm",
-      "phase": "destruction",
+      "phase": "any",
       "category": "transform-at-scale",
       "verification_mode": "none",
       "priority": 88

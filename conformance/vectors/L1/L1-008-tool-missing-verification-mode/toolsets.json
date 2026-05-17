@@ -6,7 +6,8 @@
     {
       "name": "ts-morph",
       "phase": "surgery",
-      "category": "logic-substrate"
+      "category": "logic-substrate",
+      "priority": 80
     }
   ]
 }

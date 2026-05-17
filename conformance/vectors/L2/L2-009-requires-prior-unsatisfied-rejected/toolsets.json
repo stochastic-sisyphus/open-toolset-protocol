@@ -3,7 +3,8 @@
   "toolset_name": "requires-prior-nav",
   "version": "0.1.0",
   "policies": {
-    "default_action": "allow"
+    "default_action": "allow",
+    "forbidden_args": []
   },
   "tools": [
     {
@@ -11,14 +12,18 @@
       "phase": "reconnaissance",
       "category": "index-search",
       "verification_mode": "deterministic",
-      "requires_prior": ["category:navigation"],
-      "description": "Text search — only after a navigation tool has run"
+      "requires_prior": [
+        "category:navigation"
+      ],
+      "description": "Text search — only after a navigation tool has run",
+      "priority": 70
     },
     {
       "name": "git-status",
       "phase": "reconnaissance",
       "category": "navigation",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 60
     }
   ]
 }

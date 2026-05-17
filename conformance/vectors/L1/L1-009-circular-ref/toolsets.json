@@ -3,6 +3,8 @@
   "toolset_name": "cycle-a",
   "version": "0.1.0",
   "toolsets": [
-    { "$ref": "./cycle-b.toolsets.json" }
+    {
+      "$ref": "./cycle-b.toolsets.json"
+    }
   ]
 }

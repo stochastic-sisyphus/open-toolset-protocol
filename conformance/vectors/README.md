@@ -50,7 +50,7 @@ conformance/vectors/
 | Code | Meaning |
 |---|---|
 | 0 | Accepted - command executed successfully |
-| 2 | Policy rejection: denylist, default_deny, phase gate, precondition, banned pattern |
+| 2 | Policy rejection: denylist, default_deny, phase gate, precondition, forbidden args |
 | 3 | Schema error: registry failed JSON Schema validation |
 | 4 | Registry not found |
 
@@ -63,7 +63,7 @@ conformance/vectors/
 | `registry_cycle` | L1 | `$ref` resolution detected a cycle |
 | `denylist_match` | L2 | Tool name matched `policies.deny` |
 | `default_deny` | L2 | No allow match and `default_action` is `"deny"` |
-| `banned_pattern_match` | L2 | Full command line matched `policies.banned_patterns` |
+| `forbidden_args_match` | L2 | Full argv list matched `policies.forbidden_args` |
 | `phase_gate_violation` | L2 | Tool phase does not match active phase |
 | `required_tool_skipped` | L2 | Phase transition blocked: required tool not yet invoked |
 | `precondition_unsatisfied` | L2 | `requires_prior` not satisfied by current phase trace |

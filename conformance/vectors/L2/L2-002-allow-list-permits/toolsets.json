@@ -4,14 +4,18 @@
   "version": "0.1.0",
   "policies": {
     "default_action": "deny",
-    "allow": ["ls"]
+    "allow": [
+      "ls"
+    ],
+    "forbidden_args": []
   },
   "tools": [
     {
       "name": "ls",
       "phase": "reconnaissance",
       "category": "navigation",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 60
     }
   ]
 }

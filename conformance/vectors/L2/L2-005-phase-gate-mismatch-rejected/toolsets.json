@@ -3,7 +3,8 @@
   "toolset_name": "phase-gated",
   "version": "0.1.0",
   "policies": {
-    "default_action": "allow"
+    "default_action": "allow",
+    "forbidden_args": []
   },
   "tools": [
     {
@@ -11,13 +12,15 @@
       "phase": "surgery",
       "category": "logic-substrate",
       "verification_mode": "deterministic",
-      "description": "Python AST transform — surgery only"
+      "description": "Python AST transform — surgery only",
+      "priority": 80
     },
     {
       "name": "git-status",
       "phase": "reconnaissance",
       "category": "navigation",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 60
     }
   ]
 }

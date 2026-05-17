@@ -4,7 +4,10 @@
   "title": "OATP Toolset Registry",
   "description": "Schema for toolsets.json — the Open Agent Toolset Protocol registry declaring allowed tools, phases, capabilities, and instrumentation configuration.",
   "type": "object",
-  "required": ["toolset_name", "version"],
+  "required": [
+    "toolset_name",
+    "version"
+  ],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -38,7 +41,11 @@
       "description": "Phase names this toolset participates in.",
       "items": {
         "type": "string",
-        "enum": ["reconnaissance", "surgery", "instrumentation"]
+        "enum": [
+          "reconnaissance",
+          "surgery",
+          "instrumentation"
+        ]
       },
       "uniqueItems": true
     },
@@ -61,8 +68,16 @@
     }
   },
   "anyOf": [
-    { "required": ["tools"] },
-    { "required": ["toolsets"] }
+    {
+      "required": [
+        "tools"
+      ]
+    },
+    {
+      "required": [
+        "toolsets"
+      ]
+    }
   ],
   "$defs": {
     "capabilities": {
@@ -104,30 +119,48 @@
       "properties": {
         "default_action": {
           "type": "string",
-          "enum": ["allow", "deny"],
+          "enum": [
+            "allow",
+            "deny"
+          ],
           "description": "Action for invocations that match no explicit allow/deny entry. Default: 'deny'.",
           "default": "deny"
         },
         "allow": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "Tool names or glob patterns explicitly permitted. Evaluated before deny. Globs match tool name, not command line."
         },
         "deny": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "Tool names or glob patterns explicitly forbidden. Always wins on conflict with allow."
         },
-        "banned_patterns": {
+        "forbidden_args": {
           "type": "array",
-          "items": { "type": "string" },
-          "description": "Regex patterns matched against the full command line (name + args). Any match causes immediate denial."
+          "description": "Literal argv sequences that are denied before execution.",
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
     "tool": {
       "type": "object",
-      "required": ["name", "phase", "category", "verification_mode"],
+      "required": [
+        "name",
+        "phase",
+        "category",
+        "verification_mode"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -137,7 +170,12 @@
         },
         "phase": {
           "type": "string",
-          "enum": ["reconnaissance", "surgery", "instrumentation", "any"],
+          "enum": [
+            "reconnaissance",
+            "surgery",
+            "instrumentation",
+            "any"
+          ],
           "description": "When in the GPS sequence this tool runs. Use 'any' for tools that may run in any phase."
         },
         "category": {
@@ -146,8 +184,17 @@
         },
         "verification_mode": {
           "type": "string",
-          "enum": ["deterministic", "heuristic", "none"],
+          "enum": [
+            "deterministic",
+            "heuristic",
+            "none"
+          ],
           "description": "How the tool's output can be verified."
+        },
+        "priority": {
+          "type": "number",
+          "description": "Numeric category-substitution preference. Higher values win when several tools satisfy the same category.",
+          "default": 0
         },
         "description": {
           "type": "string",
@@ -181,7 +228,11 @@
         },
         "gps_step": {
           "type": "string",
-          "enum": ["locate", "map", "instrument"],
+          "enum": [
+            "locate",
+            "map",
+            "instrument"
+          ],
           "description": "Optional GPS sub-step within reconnaissance phase. Only enforced when capabilities.gps_protocol is true."
         },
         "requires_approval": {
@@ -192,7 +243,9 @@
     },
     "instrumented_return": {
       "type": "object",
-      "required": ["required"],
+      "required": [
+        "required"
+      ],
       "additionalProperties": false,
       "properties": {
         "required": {
@@ -208,7 +261,10 @@
     },
     "nested_toolset": {
       "type": "object",
-      "required": ["toolset_name", "version"],
+      "required": [
+        "toolset_name",
+        "version"
+      ],
       "description": "A nested toolset definition. Same structure as the root toolset. Identified by presence of toolset_name.",
       "additionalProperties": false,
       "properties": {
@@ -234,7 +290,11 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["reconnaissance", "surgery", "instrumentation"]
+            "enum": [
+              "reconnaissance",
+              "surgery",
+              "instrumentation"
+            ]
           },
           "uniqueItems": true
         },
@@ -252,8 +312,16 @@
         }
       },
       "anyOf": [
-        { "required": ["tools"] },
-        { "required": ["toolsets"] }
+        {
+          "required": [
+            "tools"
+          ]
+        },
+        {
+          "required": [
+            "toolsets"
+          ]
+        }
       ]
     }
   }

@@ -6,7 +6,8 @@
       "name": "ls",
       "phase": "reconnaissance",
       "category": "navigation",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 60
     }
   ]
 }

@@ -9,12 +9,17 @@
     "capability_negotiation": false,
     "state_attestation": false
   },
-  "phases": ["reconnaissance"],
+  "phases": [
+    "reconnaissance"
+  ],
   "policies": {
     "default_action": "deny",
-    "allow": ["ls", "cat"],
+    "allow": [
+      "ls",
+      "cat"
+    ],
     "deny": [],
-    "banned_patterns": []
+    "forbidden_args": []
   },
   "tools": [
     {
@@ -23,7 +28,10 @@
       "category": "index-search",
       "verification_mode": "deterministic",
       "description": "Read-only file search.",
-      "operational_constraints": ["read-only"]
+      "operational_constraints": [
+        "read-only"
+      ],
+      "priority": 80
     }
   ]
 }

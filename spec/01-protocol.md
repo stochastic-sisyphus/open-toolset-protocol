@@ -56,14 +56,14 @@ If no registry is found, the Adapter MUST reject all invocations with exit code 
 
 For each invocation, the Adapter MUST:
 
-1. Identify the tool by matching `cmd` against the `tools[].command` field in the registry
-2. Check `policies.banned_patterns` - if the full command string matches any pattern, deny
-3. If the tool is found: check `args_pattern.allow` and `args_pattern.deny` regexes
+1. Identify the tool by matching `cmd` against the `tools[].name` field in the registry
+2. Check `policies.forbidden_args` - if the full argv list exactly matches any entry, deny
+3. If multiple tools satisfy the requested category, choose the highest `priority` (ties break by name)
 4. Check `cwd_constraint` against the actual working directory
 5. Check `path_allowlist` and `path_denylist` in policies
 6. If all checks pass: allow
 
-If no matching tool entry is found in the registry and `policies.default_action` is `"deny"`, the Adapter MUST deny the invocation. If `default_action` is `"allow"`, the Adapter MUST allow it (and SHOULD emit a `tool.allow` event with `policy_match: "default_allow"`).
+If no matching tool entry is found in the registry and `policies.default_action` is `"deny"`, the Adapter MUST deny the invocation. If `default_action` is `"allow"`, the Adapter MUST allow it (and SHOULD emit a `tool.allow` event with `policy_match: "default_allow"`). When more than one tool satisfies the requested category, the Adapter MUST select the candidate with the highest `priority` and MAY use a deterministic name tie-break.
 
 ### 2.3 Execution
 

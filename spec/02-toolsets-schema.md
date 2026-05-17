@@ -37,6 +37,7 @@ Each entry in `tools` is an object with the following fields:
 | `phase` | string (enum) | REQUIRED | Phase this tool runs in: `reconnaissance`, `surgery`, `instrumentation`, or `any` |
 | `category` | string | REQUIRED | What kind of tool this is. Open vocabulary - see canonical list below |
 | `verification_mode` | string (enum) | REQUIRED | `deterministic`, `heuristic`, or `none` |
+| `priority` | number | OPTIONAL | Numeric category-substitution preference. Higher values win when several tools satisfy the same category |
 | `description` | string | OPTIONAL | Human-readable description of this tool's purpose |
 | `binary_repo` | string | OPTIONAL | Upstream source URL for the tool binary |
 | `operational_constraints` | array of strings | OPTIONAL | Normative constraints on usage (e.g. `"read-only"`, `"no network"`, `"single-file scope"`) |
@@ -51,21 +52,21 @@ The `category` field uses an open vocabulary - any string is valid. OATP publish
 | Category | Description |
 |---|---|
 | `navigation` | Codebase navigation and graph traversal |
-| `syntax-match-rewrite` | Pattern-based structural search and rewrite (Comby, ast-grep, Semgrep, Amber) |
-| `semantic-query` | Semantic code analysis and querying (CodeQL, Joern, weggli, Infer) |
-| `transform-at-scale` | Large-scale codemod tools (Coccinelle, OpenRewrite, Rector, Bowler) |
-| `merge-diff` | Structural diff and merge (difftastic, mergiraf, weave) |
-| `index-search` | Full-text and trigram code search (Zoekt, Livegrep, OpenGrok) |
+| `syntax-match-rewrite` | Structural search and rewrite, backed by a mature crate when available |
+| `semantic-query` | Semantic code analysis and querying |
+| `transform-at-scale` | Large-scale codemod tools |
+| `merge-diff` | Structural diff and merge |
+| `index-search` | Full-text and trigram code search |
 | `semantic-search` | Vector/embedding-based code search |
-| `cross-reference` | Cross-reference and call graph tools (Kythe) |
-| `config-substrate` | Configuration language parsers and transformers (pglast, sqlglot, yq, crossplane) |
-| `logic-substrate` | Language-specific AST logic tools (ts-morph, LibCST) |
-| `verification` | Formal verification tools (TLA+, Aeneas) |
+| `cross-reference` | Cross-reference and call graph tools |
+| `config-substrate` | Configuration language parsers and transformers |
+| `logic-substrate` | Language-specific AST logic tools |
+| `verification` | Formal verification tools |
 | `synthesis-smt` | Synthesis and SMT solver tools |
 | `datalog-logic` | Datalog and logic programming tools |
 | `structural-edit` | AST-based structural editors |
 
-Categories let agents reason about substitution: an agent that requires a `semantic-query` tool can select from CodeQL, Joern, or weggli without hardcoding a name. They also let toolsets advertise coverage gaps.
+Categories let agents reason about substitution: if a requested category has multiple valid tools, the adapter resolves to the highest-priority candidate and uses the rest only if the chosen tool is unavailable or fails policy. They also let toolsets advertise coverage gaps.
 
 ## Instrumented return object
 
@@ -109,7 +110,7 @@ Example structure:
 The `policies` block applies globally to all tool invocations. For each invocation, the adapter evaluates policies in this order:
 
 1. If tool name matches any pattern in `policies.deny` → reject (exit 2, reason `denylist_match`). **Deny always wins.**
-2. If full command line matches any regex in `policies.banned_patterns` → reject (exit 2, reason `banned_pattern_match`).
+2. If the full argv list exactly matches any entry in `policies.forbidden_args` → reject (exit 2, reason `forbidden_args_match`).
 3. If tool name matches any pattern in `policies.allow` → continue to phase/precondition/required gates.
 4. Else if `policies.default_action == "allow"` → continue.
 5. Else → reject (exit 2, reason `default_deny`).
@@ -121,7 +122,7 @@ Then, after policies pass:
 8. `requires_approval` check - pause and emit `tool.approval_requested` if true.
 9. If all pass, allow.
 
-**Glob semantics**: `policies.allow` and `policies.deny` use git-style globbing. Patterns match against tool `name`, not against the command line. For command-line pattern matching, use `banned_patterns` (regex).
+**Glob semantics**: `policies.allow` and `policies.deny` use git-style globbing. Patterns match against tool `name`, not against the command line. For arg-level restriction, use `policies.forbidden_args` (literal argv matching).
 
 ## Registry composition via `$ref`
 
@@ -147,7 +148,7 @@ A `toolsets.json` may reference other registries using `$ref` entries in the `to
 
 Resolution is **transitive** - `$ref`'d registries can themselves reference others. The adapter MUST detect cycles by tracking the resolution stack. A cycle causes exit 3, reason `registry_cycle`, with `cycle_path` listing the stack.
 
-Merge semantics: each resolved registry's tools are flattened into the parent tool list. The parent's `capabilities` win on conflict. Each tool's `phase` and `category` are preserved from its source registry.
+Merge semantics: each resolved registry's tools are flattened into the parent tool list. The parent's `capabilities` win on conflict. Each tool's `phase`, `category`, and `priority` are preserved from its source registry.
 
 Resolution is **depth-first, in declaration order** - identical inputs always produce identical resolved registries (deterministic).
 
@@ -166,10 +167,17 @@ Resolution is **depth-first, in declaration order** - identical inputs always pr
       "phase": "reconnaissance",
       "category": "index-search",
       "verification_mode": "deterministic",
+      "priority": 70,
       "description": "Read-only file search",
       "operational_constraints": ["read-only"]
     }
-  ]
+  ],
+  "policies": {
+    "default_action": "deny",
+    "allow": ["ls", "cat"],
+    "deny": [],
+    "forbidden_args": [["rm", "-rf", "/"]]
+  }
 }
 ```
 

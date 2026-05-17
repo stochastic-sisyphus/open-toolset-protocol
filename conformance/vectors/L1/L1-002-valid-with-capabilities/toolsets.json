@@ -14,7 +14,8 @@
       "phase": "reconnaissance",
       "category": "syntax-match-rewrite",
       "verification_mode": "deterministic",
-      "description": "Structural code search and rewrite"
+      "description": "Structural code search and rewrite",
+      "priority": 95
     }
   ]
 }

@@ -107,11 +107,11 @@ fn main() {
             // TODO: capability negotiation
             //   Emit adapter capability offer, accept agent claim, compute intersection
 
-            // TODO: check active_phase (default: reconnaissance on session start)
+            // TODO: check active_phase (default: reconnaissance on session start) and priority-based category substitution and resolve priority-ranked category substitutions
 
             // TODO: validate invocation against active toolset
             //   1. policies.deny glob match -> reject exit 2, denylist_match
-            //   2. policies.banned_patterns regex match -> reject exit 2, banned_pattern_match
+            //   2. policies.forbidden_args literal argv match -> reject exit 2, forbidden_args_match
             //   3. policies.allow glob match -> continue
             //   4. policies.default_action -> allow or deny
             //   5. tool.phase vs active_phase -> reject exit 2, phase_gate_violation

@@ -4,14 +4,18 @@
   "version": "0.1.0",
   "policies": {
     "default_action": "allow",
-    "deny": ["grep"]
+    "deny": [
+      "grep"
+    ],
+    "forbidden_args": []
   },
   "tools": [
     {
       "name": "ast-grep",
       "phase": "reconnaissance",
       "category": "syntax-match-rewrite",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 95
     }
   ]
 }

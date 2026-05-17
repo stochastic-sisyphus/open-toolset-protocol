@@ -6,7 +6,8 @@
     {
       "name": "ast-grep",
       "category": "syntax-match-rewrite",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 95
     }
   ]
 }

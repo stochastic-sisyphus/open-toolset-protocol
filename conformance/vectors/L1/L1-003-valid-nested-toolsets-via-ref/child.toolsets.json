@@ -8,7 +8,8 @@
       "phase": "reconnaissance",
       "category": "navigation",
       "verification_mode": "deterministic",
-      "description": "Read-only repository state inspection"
+      "description": "Read-only repository state inspection",
+      "priority": 60
     }
   ]
 }

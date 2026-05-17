@@ -3,7 +3,8 @@
   "toolset_name": "any-phase-tool",
   "version": "0.1.0",
   "policies": {
-    "default_action": "allow"
+    "default_action": "allow",
+    "forbidden_args": []
   },
   "tools": [
     {
@@ -11,7 +12,8 @@
       "phase": "any",
       "category": "navigation",
       "verification_mode": "deterministic",
-      "description": "Repository state — allowed in any phase"
+      "description": "Repository state — allowed in any phase",
+      "priority": 60
     }
   ]
 }

@@ -3,7 +3,8 @@
   "toolset_name": "required-tool-satisfied",
   "version": "0.1.0",
   "policies": {
-    "default_action": "allow"
+    "default_action": "allow",
+    "forbidden_args": []
   },
   "tools": [
     {
@@ -12,13 +13,15 @@
       "category": "navigation",
       "verification_mode": "deterministic",
       "required": true,
-      "description": "Symbol index — required before leaving reconnaissance"
+      "description": "Symbol index — required before leaving reconnaissance",
+      "priority": 55
     },
     {
       "name": "ts-morph",
       "phase": "surgery",
       "category": "logic-substrate",
-      "verification_mode": "deterministic"
+      "verification_mode": "deterministic",
+      "priority": 80
     }
   ]
 }

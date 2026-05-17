@@ -3,6 +3,8 @@
   "toolset_name": "parent-agent",
   "version": "0.1.0",
   "toolsets": [
-    { "$ref": "./child.toolsets.json" }
+    {
+      "$ref": "./child.toolsets.json"
+    }
   ]
 }

@@ -2,50 +2,57 @@
 
 This document specifies the behavior of a conformant OATP adapter. The reference implementation is the `oatp` binary in `adapter/`.
 
-OATP defines exactly one adapter role: the universal `oatp` binary. Framework-specific runtime adapters are out of scope - frameworks contribute registry translators (see §7), not parallel adapters.
+OATP defines exactly one adapter role: the universal `oatp` binary. Framework-specific runtime adapters are out of scope - frameworks contribute registry translators (see spec/07-registry-translators.md), not parallel adapters.
 
-## Entry point
+## Binary shape
 
-The canonical adapter invocation is:
+The adapter is one binary with many subcommands:
 
-```
-oatp exec -- <cmd> [args...]
-```
+- `oatp validate <toolsets.json>` - validate a registry against the schema
+- `oatp resolve [<toolsets.json>]` - resolve nested registries, apply priority-based category substitution, and print the flattened manifest
+- `oatp exec -- <cmd> [args...]` - validate and execute a command
+- `oatp trace` - read or tail the event sink
 
-The `--` separator is REQUIRED to clearly delimit adapter flags from the command being validated. The Adapter MUST treat everything after `--` as the command and its arguments.
+`exec` MUST use `--` to separate adapter flags from the command being executed. The adapter MUST treat everything after `--` as the command and its arguments.
 
-Future subcommands:
+## Crate-binding rule
 
-- `oatp check <toolsets.json>` - validate a registry against the schema (L1 conformance)
-- `oatp trace` - tail the event sink
+Any matcher, validator, parser, resolver, serializer, execution engine, or trace sink that already exists as a mature crate MUST be bound directly rather than reimplemented. Glue code that adapts those crates to the OATP binary shape MUST remain at or below 150 LOC per integration boundary.
+
+The binding rule exists so that OATP implementations inherit the maturity of the underlying ecosystem instead of reconstructing it with bespoke shell glue.
 
 ## Registry loading
 
-The Adapter MUST locate the Toolset Registry in this order:
+The adapter MUST locate the Toolset Registry in this order:
 
 1. `$OATP_TOOLSET` environment variable (path to `toolsets.json`)
 2. `./toolsets.json` (current working directory)
 3. `~/.config/oatp/toolsets.json`
 
-If the located file fails JSON Schema validation (against `schemas/toolsets.schema.json`), the Adapter MUST exit with code 3 and emit a `toolset.schema_error` trace event before any invocation is processed.
+If the located file fails JSON Schema validation against `schemas/toolsets.schema.json`, the adapter MUST exit with code 3 and emit a `toolset.schema_error` trace event before any invocation is processed.
 
-If no registry is found at any location, the Adapter MUST exit with code 4.
+If no registry is found at any location, the adapter MUST exit with code 4.
+
+## Resolve flow
+
+`oatp resolve` MUST flatten nested registries, apply `$ref` resolution depth-first in declaration order, and produce a deterministic manifest. When multiple tools satisfy the same category, the adapter MUST prefer the tool with the highest numeric `priority`; ties MUST break deterministically by tool name.
 
 ## Exec flow
 
 ```
 1. Parse: extract cmd and args from argv after --
 2. Load: read and validate toolsets.json (cached for process lifetime)
-3. Validate: apply policy (see spec/01-protocol.md §2.2)
+3. Resolve: determine the candidate tool and apply priority-based category substitution
+4. Validate: apply policy
    → deny: emit tool.deny, exit 2
    → approval required: emit tool.approval_requested, await signal
    → allow: continue
-4. Emit: tool.exec.start event
-5. Execute: spawn subprocess, inherit env + apply overrides
-6. Stream: pass stdout/stderr with optional redaction
-7. Wait: collect exit code and wall-clock duration
-8. Emit: tool.exec.end event
-9. Exit: with subprocess exit code (or 1 if timeout)
+5. Emit: tool.exec.start event
+6. Execute: spawn subprocess, inherit env + apply overrides
+7. Stream: pass stdout/stderr with optional redaction
+8. Wait: collect exit code and wall-clock duration
+9. Emit: tool.exec.end event
+10. Exit: with subprocess exit code (or 1 if timeout)
 ```
 
 ## Environment variables
@@ -66,17 +73,17 @@ If no registry is found at any location, the Adapter MUST exit with code 4.
 | 3 | Schema error: Toolset Registry failed validation |
 | 4 | Toolset not found: no registry located |
 
-The Adapter MUST return the subprocess's own exit code when execution succeeds. If the subprocess exits non-zero, the Adapter MUST return exit code 1 (not the subprocess code directly), and MUST include the actual subprocess exit code in the `tool.exec.end` trace event's `exit_code` field.
+The adapter MUST return the subprocess's own exit code when execution succeeds. If the subprocess exits non-zero, the adapter MUST return exit code 1 (not the subprocess code directly), and MUST include the actual subprocess exit code in the `tool.exec.end` trace event's `exit_code` field.
 
 ## Stdout and stderr passthrough
 
-The Adapter MUST stream stdout and stderr from the subprocess to its own stdout and stderr respectively, preserving order as closely as possible. If redaction is enabled, the Adapter MUST apply patterns before writing to its output streams.
+The adapter MUST stream stdout and stderr from the subprocess to its own stdout and stderr respectively, preserving order as closely as possible. If redaction is enabled, the adapter MUST apply patterns before writing to its output streams.
 
-The Adapter MUST NOT buffer or suppress stdout/stderr on successful execution. For denied or errored invocations, the Adapter MUST write a human-readable rejection reason to stderr.
+The adapter MUST NOT buffer or suppress stdout/stderr on successful execution. For denied or errored invocations, the adapter MUST write a human-readable rejection reason to stderr.
 
 ## Approval workflows
 
-When a tool has `requires_approval: true`, the Adapter:
+When a tool has `requires_approval: true`, the adapter:
 
 1. MUST emit `tool.approval_requested` with full invocation details
 2. MUST pause execution
@@ -86,9 +93,9 @@ When a tool has `requires_approval: true`, the Adapter:
 
 ## Phase gating algorithm
 
-The Adapter MUST track `active_phase`, initialized to `reconnaissance` at session start.
+The adapter MUST track `active_phase`, initialized to `reconnaissance` at session start.
 
-Phase transition is an explicit agent intent: `oatp phase --set <phase>`. The Adapter MUST process phase transitions as follows:
+Phase transition is an explicit agent intent: `oatp phase --set <phase>`. The adapter MUST process phase transitions as follows:
 
 ```
 on phase_transition(from, to):
@@ -135,4 +142,4 @@ The agent may then invoke the missing tools and retry the transition.
 
 ## Caching
 
-The Adapter SHOULD cache the loaded and validated Toolset Registry for the duration of its process lifetime to avoid repeated I/O. If the registry file changes on disk, the behavior is implementation-defined (the reference adapter does not hot-reload).
+The adapter SHOULD cache the loaded and validated Toolset Registry for the duration of its process lifetime to avoid repeated I/O. If the registry file changes on disk, the behavior is implementation-defined (the reference adapter does not hot-reload).
