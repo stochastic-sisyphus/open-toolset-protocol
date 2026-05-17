@@ -2,8 +2,9 @@
 name = "oatp"
 version = "0.0.1"
 edition = "2021"
+authors = ["stochastic-sisyphus"]
 license = "Apache-2.0"
-description = "Reference adapter for the Open Toolset Protocol"
+description = "Reference adapter for the Open Agent Toolset Protocol (OATP)"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
