@@ -6,7 +6,7 @@ This document defines how implementations claim OATP conformance and what each l
 
 OATP conformance is tiered around the four declared capabilities. Each level is a strict superset of the previous.
 
-### L1 — Discovery
+### L1 - Discovery
 
 The implementation can parse, validate, and resolve the toolset registry, and can respond to tool discovery queries.
 
@@ -21,7 +21,7 @@ Requirements:
 
 Claim: `OATP-L1/0.x`
 
-### L2 — Phase Gating
+### L2 - Phase Gating
 
 The implementation enforces `phase_gate` per tool and tracks phase transitions.
 
@@ -40,7 +40,7 @@ Requirements:
 
 Claim: `OATP-L2/0.x`
 
-### L3 — Capability Negotiation
+### L3 - Capability Negotiation
 
 The implementation exchanges and validates capability blocks with the agent at session start.
 
@@ -59,13 +59,13 @@ Requirements:
 
 Claim: `OATP-L3/0.x`
 
-### L4 — State Attestation
+### L4 - State Attestation
 
 The implementation enforces structured `instrumented_return` contracts. This is full OATP compliance.
 
 Requirements:
 - MUST satisfy all L3 requirements
-- MUST enforce `instrumented_return.required: true` — reject tool results that do not satisfy `schema_ref`
+- MUST enforce `instrumented_return.required: true` - reject tool results that do not satisfy `schema_ref`
 - MUST emit `tool.attestation_failed` when a return value fails schema validation
 - MUST apply `redaction.patterns` to stdout and stderr before returning to the caller
 - MUST emit `tool.redact` events when redaction is applied

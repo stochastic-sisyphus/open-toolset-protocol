@@ -2,7 +2,7 @@
 
 OATP evolves through RFCs (Requests for Comments). An RFC is a design document describing a proposed change to the spec, schema, or conformance requirements.
 
-## When an RFC is required
+## RFC scope
 
 An RFC is required for:
 
@@ -23,7 +23,7 @@ An RFC is not required for:
 ## Process
 
 1. **Copy the template**: `cp RFC/0000-template.md RFC/NNNN-short-title.md` using the next available number
-2. **Fill it in**: complete all sections — Summary, Motivation, Detailed design, Drawbacks, Alternatives, Unresolved questions
+2. **Fill it in**: complete all sections - Summary, Motivation, Detailed design, Drawbacks, Alternatives, Unresolved questions
 3. **Open a PR**: title format `RFC NNNN: Short title`
 4. **Discussion**: feedback happens in the PR. Update the RFC in response to comments.
 5. **Decision**: maintainers merge (accepted) or close with rationale (rejected)
@@ -39,8 +39,8 @@ Use the next sequential 4-digit number (e.g. `0001`, `0002`). The template is `0
 | RFC | Title | Status |
 |---|---|---|
 | [RFC 0001](0001-discipline-categories.md) | Discipline Categories | Draft |
-| [RFC 0002](0002-gps-protocol.md) | GPS Protocol | Draft |
-| [RFC 0003](0003-framework-adapters.md) | Framework Adapters | Draft |
+| [RFC 0002](0002-gps-protocol.md) | Sequenced Phase Sub-Steps | Draft |
+| [RFC 0003](0003-registry-translators.md) | Registry Translator Pattern | Draft |
 | [RFC 0004](0004-formal-verification.md) | Formal Verification Conformance (L5 and L6) | Draft |
 
 ## Status labels

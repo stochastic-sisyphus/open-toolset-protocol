@@ -8,7 +8,7 @@ The initial author acts as BDFL (Benevolent Dictator For Life) during the bootst
 
 ## Decision making
 
-All normative spec changes — protocol semantics, schema fields, conformance requirements, adapter behavior — land via RFC merged to `main`.
+All normative spec changes - protocol semantics, schema fields, conformance requirements, adapter behavior - land via RFC merged to `main`.
 
 Non-normative changes (documentation fixes, example updates, typos, conformance vector additions) may be merged directly by maintainers without a formal RFC.
 

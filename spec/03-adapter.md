@@ -2,6 +2,8 @@
 
 This document specifies the behavior of a conformant OATP adapter. The reference implementation is the `oatp` binary in `adapter/`.
 
+OATP defines exactly one adapter role: the universal `oatp` binary. Framework-specific runtime adapters are out of scope - frameworks contribute registry translators (see §7), not parallel adapters.
+
 ## Entry point
 
 The canonical adapter invocation is:
@@ -14,8 +16,8 @@ The `--` separator is REQUIRED to clearly delimit adapter flags from the command
 
 Future subcommands:
 
-- `oatp check <toolsets.json>` — validate a registry against the schema (L1 conformance)
-- `oatp trace` — tail the event sink
+- `oatp check <toolsets.json>` - validate a registry against the schema (L1 conformance)
+- `oatp trace` - tail the event sink
 
 ## Registry loading
 
@@ -122,7 +124,7 @@ on tool_invoke(tool_name, args):
 
 ## Required tool enforcement
 
-A tool with `required: true` MUST be invoked at least once in its declared phase before the agent may transition to the next phase. Enforcement happens at **transition time** — when `oatp phase --set` is called, the adapter scans the phase trace log.
+A tool with `required: true` MUST be invoked at least once in its declared phase before the agent may transition to the next phase. Enforcement happens at **transition time** - when `oatp phase --set` is called, the adapter scans the phase trace log.
 
 If any required tool for the exiting phase has not been invoked, the adapter MUST:
 1. Reject the transition with exit code 2

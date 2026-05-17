@@ -1,32 +1,34 @@
-# Framework Adapters
+# Registry Translators
 
 OATP is not a replacement for existing agent toolset frameworks. It is the interop layer that makes those frameworks' toolsets composable, inspectable, and policy-enforced across implementations.
 
-This document describes the **shim pattern** — how to wrap an existing framework's native toolset in an OATP-conformant surface without changing the framework's internals.
+This document describes the **translator pattern** - how to convert an existing framework's native toolset into a conformant `toolsets.json` without changing the framework's internals and without creating a parallel runtime enforcement layer.
 
-## 7.1 The shim pattern
+## 7.1 The translator pattern
 
-A framework adapter is a thin wrapper that:
+A registry translator is a one-shot tool that:
 
 1. **Reads** the framework's native toolset (Pydantic AI `FunctionToolset`, MCP `tools/list` response, LangChain `Toolkit`, OpenAI tool definitions, etc.)
 2. **Translates** each native tool into an OATP `tool` entry, assigning `phase`, `category`, `verification_mode`, and any `requires_prior` constraints appropriate for the tool's role
-3. **Generates** a `toolsets.json` document conforming to `schemas/toolsets.schema.json`
-4. **Optionally enforces** OATP policies at invocation time by intercepting the framework's tool-call hook
+3. **Emits** a `toolsets.json` document conforming to `schemas/toolsets.schema.json` and exits
 
-The framework keeps its execution model. OATP adds a declarative contract layer. A framework adapter MUST:
+Translators do NOT intercept tool execution. Once a `toolsets.json` has been emitted, runtime enforcement flows entirely through the universal `oatp` binary at `adapter/`. OATP has exactly one runtime adapter role - every agent, regardless of framework, wraps its shell exec through `oatp`. Per-framework runtime adapters would re-fragment what OATP unifies.
+
+A registry translator MUST:
 - Produce a `toolsets.json` that validates against `schema.json`
-- Preserve framework-specific tool semantics — no behavior changes
-- Enforce OATP policies if it intercepts execution; if it does not intercept execution, the generated `toolsets.json` is spec-only (useful for discovery and auditing)
+- Preserve framework-specific tool semantics - no behavior changes
+- Emit and exit; it MUST NOT wrap execution or intercept tool-call hooks at runtime
 
-## 7.2 Pydantic AI adapter sketch
+## 7.2 Pydantic AI translator sketch
 
 Pydantic AI ([docs](https://pydantic.dev/docs/ai/tools-toolsets/toolsets/)) provides `FunctionToolset`, `ExternalToolset`, and `CombinedToolset`. A `FunctionToolset` groups locally defined Python functions as agent tools. An `ExternalToolset` allows agents to call tools executed by an upstream service. `CombinedToolset` merges multiple toolsets.
 
-Translation sketch (conceptual — not normative):
+Translation sketch (conceptual - not normative):
 
 ```python
 # Conceptual — not normative
 from pydantic_ai.tools import FunctionToolset
+import json
 
 def to_oatp(toolset: FunctionToolset, *, phase: str, category: str) -> dict:
     """Translate a Pydantic AI FunctionToolset to an OATP toolset registry."""
@@ -51,15 +53,18 @@ def to_oatp(toolset: FunctionToolset, *, phase: str, category: str) -> dict:
             for t in toolset.tools
         ],
     }
+
+# Emit and exit — do not intercept execution
+print(json.dumps(to_oatp(my_toolset, phase="reconnaissance", category="navigation")))
 ```
 
 Key translation decisions:
-- `phase` and `category` must be assigned by the adapter author — Pydantic AI tools carry no phase metadata
+- `phase` and `category` must be assigned by the translator author - Pydantic AI tools carry no phase metadata
 - `verification_mode` defaults to `"heuristic"` for function tools (output is not guaranteed deterministic)
-- `ExternalToolset` tools — those executed by a frontend or upstream service — map well to `requires_approval: true`
+- `ExternalToolset` tools - those executed by a frontend or upstream service - map well to `requires_approval: true`
 - `CombinedToolset` maps to OATP's nested `toolsets` array: each constituent toolset becomes a nested registry entry
 
-## 7.3 MCP adapter sketch
+## 7.3 MCP translator sketch
 
 MCP ([spec](https://modelcontextprotocol.io)) defines `tools/list` (discover available tools and their schemas) and `tools/call` (execute a specific tool with arguments).
 
@@ -81,12 +86,14 @@ An MCP tools/list response looks like:
 }
 ```
 
-Translation to OATP:
+Translation to OATP (emit and exit - not normative):
 
 ```python
 # Conceptual — not normative
+import json
+
 def mcp_tools_to_oatp(tools_list_response: dict, *, phase: str) -> dict:
-    """Translate MCP tools/list response to OATP toolset registry."""
+    """Translate MCP tools/list response to an OATP toolset registry."""
     tools = []
     for tool in tools_list_response["tools"]:
         oatp_tool = {
@@ -110,6 +117,9 @@ def mcp_tools_to_oatp(tools_list_response: dict, *, phase: str) -> dict:
         "version": "0.0.1",
         "tools": tools,
     }
+
+# Emit and exit — do not intercept tools/call
+print(json.dumps(mcp_tools_to_oatp(response, phase="reconnaissance")))
 ```
 
 OATP and MCP are complementary:
@@ -117,29 +127,29 @@ OATP and MCP are complementary:
 - OATP adds *which phase*, *what discipline*, *what preconditions*, and *what structured return* are expected
 - An MCP server SHOULD advertise its OATP registry at `/.well-known/toolset.json` alongside its MCP endpoint so consumers can inspect tool discipline before connecting
 
-## 7.4 LangChain adapter sketch
+## 7.4 LangChain translator sketch
 
-LangChain `Tool` objects carry a `name`, `description`, and `func`. A `Toolkit` groups related tools. Translation is similar to Pydantic AI — phase and category must be assigned by the adapter author. LangChain tools default to `"heuristic"` verification mode.
+LangChain `Tool` objects carry a `name`, `description`, and `func`. A `Toolkit` groups related tools. Translation is similar to Pydantic AI - phase and category must be assigned by the translator author. LangChain tools default to `"heuristic"` verification mode. The translator emits `toolsets.json` and exits; it does not wrap `agent.run()` or intercept tool-call hooks.
 
-## 7.5 Conformance for adapters
+## 7.5 Conformance for translators
 
-A framework adapter MUST:
+A registry translator MUST:
 - Produce a `toolsets.json` that validates against `schema.json`
-- Preserve framework-specific tool semantics (no behavior changes to the wrapped tools)
-- Document which OATP capabilities it enables (at minimum: `discovery: true`)
+- Preserve framework-specific tool semantics (no behavior changes to the source tools)
+- Document which OATP capabilities are reflected (at minimum: `discovery: true`)
+- Emit and exit - no runtime interception
 
-A framework adapter SHOULD:
+A registry translator SHOULD:
 - Assign accurate `phase` and `category` values based on the tool's actual role
-- Enable `phase_gating` if it intercepts the framework's tool-call hook
-- Enable `state_attestation` if it can validate structured outputs before returning to the agent
+- Note `phase_gating: false` in the emitted registry (enforcement is the `oatp` binary's job, not the translator's)
 
 ## 7.6 Reference implementations roadmap (non-normative)
 
-Planned reference adapters. These are stubs — not yet implemented. See [RFC 0003](../RFC/0003-framework-adapters.md) for design discussion.
+Planned translators. These are stubs - not yet implemented. See [RFC 0003](../RFC/0003-registry-translators.md) for design discussion.
 
-| Integration | Path | Status |
+| Translator | Path | Status |
 |---|---|---|
-| Pydantic AI | `adapter/integrations/pydantic-ai/` | TODO |
-| MCP | `adapter/integrations/mcp/` | TODO |
-| LangChain | `adapter/integrations/langchain/` | TODO |
-| OpenAI tools | `adapter/integrations/openai-tools/` | TODO |
+| Pydantic AI | `tools/registry-translators/pydantic-ai/` | TODO |
+| MCP | `tools/registry-translators/mcp/` | TODO |
+| LangChain | `tools/registry-translators/langchain/` | TODO |
+| OpenAI tools | `tools/registry-translators/openai-tools/` | TODO |

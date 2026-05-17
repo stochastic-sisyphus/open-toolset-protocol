@@ -12,9 +12,9 @@ The adapter MUST resolve the active Toolset Registry at session start using the 
 
 **Local discovery** (in order):
 
-1. `$OATP_TOOLSET` environment variable — absolute path to `toolsets.json`
-2. `./toolsets.json` — current working directory
-3. `~/.config/oatp/toolsets.json` — user-global fallback
+1. `$OATP_TOOLSET` environment variable - absolute path to `toolsets.json`
+2. `./toolsets.json` - current working directory
+3. `~/.config/oatp/toolsets.json` - user-global fallback
 
 **Remote discovery**:
 
@@ -41,7 +41,7 @@ After resolving the registry, the adapter:
 2. Resolves nested `toolsets` depth-first into a flattened tool manifest
 3. Makes the manifest available for capability negotiation (§6.3) and phase gating (§6.2)
 
-The discovery response emitted to the agent is the flattened manifest — a flat list of resolved tools with their `phase`, `category`, `verification_mode`, and `required` fields.
+The discovery response emitted to the agent is the flattened manifest - a flat list of resolved tools with their `phase`, `category`, `verification_mode`, and `required` fields.
 
 ## 6.2 Phase gating
 
@@ -68,7 +68,7 @@ session start
 [done]
 ```
 
-Phase transitions are **explicit agent intents** — the agent calls `oatp phase --set <phase>`. The adapter logs every transition as a `phase.transition` trace event. Backward transitions (e.g. `instrumentation` → `surgery`) are permitted but MUST be logged as `phase.transition.backward` and MAY be rejected by policy.
+Phase transitions are **explicit agent intents** - the agent calls `oatp phase --set <phase>`. The adapter logs every transition as a `phase.transition` trace event. Backward transitions (e.g. `instrumentation` → `surgery`) are permitted but MUST be logged as `phase.transition.backward` and MAY be rejected by policy.
 
 ### Phase gating algorithm
 
@@ -105,7 +105,7 @@ on tool_invoke(tool_name, args):
 
 ### Required tools
 
-A tool with `required: true` MUST be invoked at least once in its declared phase before the agent may transition to the next phase. The adapter enforces this at **transition time, not invocation time** — it scans the phase trace log when `oatp phase --set` is called.
+A tool with `required: true` MUST be invoked at least once in its declared phase before the agent may transition to the next phase. The adapter enforces this at **transition time, not invocation time** - it scans the phase trace log when `oatp phase --set` is called.
 
 This mechanism prevents phase-skipping: an agent cannot proceed to surgery without completing mandatory reconnaissance, and cannot proceed to instrumentation without completing mandatory surgery steps.
 
@@ -147,9 +147,9 @@ State attestation is the mechanism that turns "agent claims it changed X" into "
 
 ### The problem it solves
 
-Surgery tools emit output. Without attestation, that output is free text — a narrative. The agent reports "I edited the file" and the system has no way to verify this without re-reading the file. When agents chain multiple mutations, the error accumulates silently.
+Surgery tools emit output. Without attestation, that output is free text - a narrative. The agent reports "I edited the file" and the system has no way to verify this without re-reading the file. When agents chain multiple mutations, the error accumulates silently.
 
-State attestation solves this by requiring surgery and instrumentation tools to return a **structured state object** validated against a declared JSON Schema (`instrumented_return.schema_ref`). The adapter validates the return value before passing it to the agent. A result that doesn't match the schema is rejected — the tool call fails with exit code 1 and a `tool.attestation_failed` trace event.
+State attestation solves this by requiring surgery and instrumentation tools to return a **structured state object** validated against a declared JSON Schema (`instrumented_return.schema_ref`). The adapter validates the return value before passing it to the agent. A result that doesn't match the schema is rejected - the tool call fails with exit code 1 and a `tool.attestation_failed` trace event.
 
 ### Enforcement
 
@@ -166,8 +166,8 @@ The validated return value is the canonical output. The agent MUST base subseque
 ### Schema references
 
 `schema_ref` is a URI. Implementations MUST support:
-- `file://` — local schema file
-- `https://` — remote schema (fetched at session start, cached)
+- `file://` - local schema file
+- `https://` - remote schema (fetched at session start, cached)
 - Fragment identifiers (`#/$defs/SurgeryResult`) within the toolset schema itself
 
 Free-text tools (`verification_mode: "none"`) MAY omit `instrumented_return`. Deterministic tools (`verification_mode: "deterministic"`) SHOULD declare it. Heuristic tools (`verification_mode: "heuristic"`) MAY declare it with `required: false` to enable optional validation.

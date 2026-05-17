@@ -1,5 +1,5 @@
-# OATP adapter for OpenAI Tools
+# OpenAI tools registry translator
 
-Reference adapter for the OpenAI tool-calling API. Not yet implemented. See [RFC 0003](../../../RFC/0003-framework-adapters.md).
+Translator for the OpenAI tool-calling API. Reads OpenAI function-calling definitions (`tools` array entries with JSON Schema) and emits a conformant `toolsets.json`. Not yet implemented. See [RFC 0003](../../RFC/0003-registry-translators.md).
 
-This integration will translate OpenAI `tools` array entries (JSON Schema function definitions) into `toolsets.json` registry entries and enforce OATP policy evaluation before forwarding tool-call responses to the model.
+This is a **one-shot translator**, not a runtime adapter. It does not intercept tool execution. Once it has written a valid `toolsets.json`, execution flows through the universal `oatp` binary at `adapter/`.

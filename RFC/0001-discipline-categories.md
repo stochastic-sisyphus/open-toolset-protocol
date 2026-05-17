@@ -1,4 +1,4 @@
-# RFC 0001 — Standardized Discipline Categories
+# RFC 0001 - Standardized Discipline Categories
 
 - **RFC number**: 0001
 - **Start date**: 2026-05-17
@@ -11,15 +11,15 @@ Define an authoritative-but-open vocabulary for the tool `category` field in OAT
 
 ## Motivation
 
-The `category` field is the mechanism by which agents reason about tool substitution and toolset coverage gaps. Without a shared vocabulary, agents cannot answer the question "do I have a `semantic-query` tool available?" — they would need to compare names or descriptions.
+The `category` field is the mechanism by which agents reason about tool substitution and toolset coverage gaps. Without a shared vocabulary, agents cannot answer the question "do I have a `semantic-query` tool available?" - they would need to compare names or descriptions.
 
 Categories enable:
 
-- **Substitution reasoning**: an agent that needs a `syntax-match-rewrite` tool can select from Comby, ast-grep, Semgrep, or Amber — any conformant implementation will do for the class of tasks. The agent doesn't need to hardcode tool names.
-- **Coverage gap detection**: a toolset can be analyzed for missing categories at each phase — for example, a `surgery` phase with no `merge-diff` tool is a gap an agent can surface before attempting mutations.
+- **Substitution reasoning**: an agent that needs a `syntax-match-rewrite` tool can select from Comby, ast-grep, Semgrep, or Amber - any conformant implementation will do for the class of tasks. The agent doesn't need to hardcode tool names.
+- **Coverage gap detection**: a toolset can be analyzed for missing categories at each phase - for example, a `surgery` phase with no `merge-diff` tool is a gap an agent can surface before attempting mutations.
 - **Registry composition**: when composing toolsets via `$ref`, the merged set can be inspected for category overlap and conflicts without reading tool descriptions.
 
-The risk of a closed enum is rigidity — new tool classes (e.g. a new SMT-backed synthesis approach, a new cross-language semantic engine) need an RFC to register, slowing adoption. An open vocabulary avoids this while the canonical list provides consistency.
+The risk of a closed enum is rigidity - new tool classes (e.g. a new SMT-backed synthesis approach, a new cross-language semantic engine) need an RFC to register, slowing adoption. An open vocabulary avoids this while the canonical list provides consistency.
 
 ## Detailed design
 
@@ -50,12 +50,12 @@ Category values are lowercase, hyphen-separated strings. No spaces, no underscor
 
 1. Open a PR adding the new category to this RFC document (the canonical list above)
 2. Include: name, description, at least one example tool
-3. No separate RFC number required — additions to RFC 0001 are minor
+3. No separate RFC number required - additions to RFC 0001 are minor
 4. Breaking changes (renaming or removing categories) require a new RFC
 
 ### Backward compatibility
 
-Category is an open vocabulary — adapters MUST NOT reject tool entries with unknown `category` values. Unknown categories are valid; they simply don't appear in the canonical list. Conformance tooling SHOULD warn on unrecognized category values but MUST NOT fail.
+Category is an open vocabulary - adapters MUST NOT reject tool entries with unknown `category` values. Unknown categories are valid; they simply don't appear in the canonical list. Conformance tooling SHOULD warn on unrecognized category values but MUST NOT fail.
 
 ## Drawbacks
 
@@ -75,4 +75,4 @@ Category is an open vocabulary — adapters MUST NOT reject tool entries with un
 
 1. Should categories form a DAG? (e.g. `syntax-match-rewrite` is-a `transform`, `semantic-query` is-a `analysis`) This would allow substitution at multiple levels of specificity.
 2. Should toolset composition track category coverage and warn on gaps? This might belong in adapter spec rather than here.
-3. Should there be a `general` or `utility` catch-all category? Current position: no — encourage explicit categorization.
+3. Should there be a `general` or `utility` catch-all category? Current position: no - encourage explicit categorization.

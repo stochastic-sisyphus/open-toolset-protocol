@@ -8,15 +8,15 @@
 
 ## Summary
 
-This RFC defines two optional conformance levels — L5 and L6 — layered on top of the existing L1–L4 levels. L5 requires an adapter to implement phase state machines as SCXML statecharts; L6 requires the adapter to provide machine-checked TLA+/PlusCal property proofs for the core safety and liveness properties of the OATP phase gating algorithm.
+This RFC defines two optional conformance levels - L5 and L6 - layered on top of the existing L1-L4 levels. L5 requires an adapter to implement phase state machines as SCXML statecharts; L6 requires the adapter to provide machine-checked TLA+/PlusCal property proofs for the core safety and liveness properties of the OATP phase gating algorithm.
 
 ---
 
 ## Motivation
 
-L1–L4 conformance (spec/05-conformance.md) covers runtime enforcement: discovery, phase gating, capability negotiation, and state attestation. But enforcement alone cannot guarantee protocol-level properties such as:
+L1-L4 conformance (spec/05-conformance.md) covers runtime enforcement: discovery, phase gating, capability negotiation, and state attestation. But enforcement alone cannot guarantee protocol-level properties such as:
 
-- **Safety**: a tool with `phase: surgery` is never executed while `active_phase` is `reconnaissance` — not just in the happy path, but under any interleaving of concurrent requests.
+- **Safety**: a tool with `phase: surgery` is never executed while `active_phase` is `reconnaissance` - not just in the happy path, but under any interleaving of concurrent requests.
 - **Liveness**: if a required tool has been invoked, a phase transition to the next phase always eventually succeeds.
 - **Cycle absence**: the `$ref` resolution algorithm terminates for any finite, acyclic registry graph.
 
@@ -30,7 +30,7 @@ This RFC does not require all adapters to pursue L5 or L6. These levels are opt-
 
 ### Conformance Levels (L5 and L6)
 
-**L5 — SCXML Phase Machines**
+**L5 - SCXML Phase Machines**
 
 An L5-conformant adapter provides an SCXML document (W3C SCXML, https://www.w3.org/TR/scxml/) that defines the phase state machine. The SCXML document MUST:
 
@@ -43,9 +43,9 @@ An L5-conformant adapter provides an SCXML document (W3C SCXML, https://www.w3.o
 
 The SCXML document MUST be stored at `formal/phase-machine.scxml` in the adapter repository.
 
-The SCXML document MAY be executable — i.e., the adapter MAY use an SCXML runtime (Apache Commons SCXML, Qt SCXML, or equivalent) as the authoritative phase state machine. If the adapter does not execute SCXML at runtime, the document is informational but still normative for conformance testing purposes.
+The SCXML document MAY be executable - i.e., the adapter MAY use an SCXML runtime (Apache Commons SCXML, Qt SCXML, or equivalent) as the authoritative phase state machine. If the adapter does not execute SCXML at runtime, the document is informational but still normative for conformance testing purposes.
 
-**L6 — TLA+/PlusCal Property Proofs**
+**L6 - TLA+/PlusCal Property Proofs**
 
 An L6-conformant adapter provides a TLA+ (https://lamport.azurewebsites.net/tla/tla.html) specification and accompanying model-checked proofs for the following properties:
 
@@ -86,16 +86,16 @@ Adapters claiming L5 or L6 MUST use these canonical names for properties and sta
 | `registry` | Resolved flat tool manifest |
 | `resolution_stack` | Stack of registry URIs being resolved (cycle detection) |
 
-### Relation to L1–L4
+### Relation to L1-L4
 
-L5 and L6 are additive. An adapter claiming L5 or L6 MUST also be L1–L4 conformant. The SCXML and TLA+ artifacts describe the same algorithm that the runtime adapter implements.
+L5 and L6 are additive. An adapter claiming L5 or L6 MUST also be L1-L4 conformant. The SCXML and TLA+ artifacts describe the same algorithm that the runtime adapter implements.
 
 ### Prior Art
 
-- **W3C SCXML** (https://www.w3.org/TR/scxml/) — state chart XML; W3C Recommendation 2015. Production-grade runtimes exist for Java (Apache Commons SCXML), C++ (Qt SCXML), and JavaScript (xstate with SCXML import).
-- **TLA+ reference** (https://lamport.azurewebsites.net/tla/tla.html) — Lamport's specification language. TLC (the TLA+ model checker) is open source and bundled with the TLA+ Toolbox. PlusCal (https://lamport.azurewebsites.net/pubs/pluscal.pdf) is a higher-level algorithm language that compiles to TLA+.
-- **Aeneas** (https://github.com/AeneasVerifier/aeneas) — Rust-to-Lean4 extraction tool; relevant if a Rust adapter implementation seeks proof of implementation-level correctness beyond specification-level TLA+ proofs. Out of scope for L6, but noted for L7+ future work.
-- **AWS TLA+ examples** (https://github.com/tlaplus/Examples) — reference library of TLA+ specifications for distributed protocols, useful for modeling the registry resolution cycle detection algorithm.
+- **W3C SCXML** (https://www.w3.org/TR/scxml/) - state chart XML; W3C Recommendation 2015. Production-grade runtimes exist for Java (Apache Commons SCXML), C++ (Qt SCXML), and JavaScript (xstate with SCXML import).
+- **TLA+ reference** (https://lamport.azurewebsites.net/tla/tla.html) - Lamport's specification language. TLC (the TLA+ model checker) is open source and bundled with the TLA+ Toolbox. PlusCal (https://lamport.azurewebsites.net/pubs/pluscal.pdf) is a higher-level algorithm language that compiles to TLA+.
+- **Aeneas** (https://github.com/AeneasVerifier/aeneas) - Rust-to-Lean4 extraction tool; relevant if a Rust adapter implementation seeks proof of implementation-level correctness beyond specification-level TLA+ proofs. Out of scope for L6, but noted for L7+ future work.
+- **AWS TLA+ examples** (https://github.com/tlaplus/Examples) - reference library of TLA+ specifications for distributed protocols, useful for modeling the registry resolution cycle detection algorithm.
 
 ---
 
@@ -116,7 +116,7 @@ An adapter claiming L5 or L6 MUST include in its repository:
 
 ## Drawbacks
 
-- L5/L6 add implementation burden for adapter authors who want to claim these levels. This is intentional — these levels exist for deployments where the burden is justified.
+- L5/L6 add implementation burden for adapter authors who want to claim these levels. This is intentional - these levels exist for deployments where the burden is justified.
 - SCXML execution at runtime adds a dependency not present in simpler implementations. The L5 spec explicitly allows non-executed SCXML (informational), which reduces this burden.
 - TLC model checking time is bounded by the state space of the model. Authors MUST bound all unbounded sequences (phase trace, resolution stack) in the TLC configuration to ensure termination.
 
@@ -125,7 +125,7 @@ An adapter claiming L5 or L6 MUST include in its repository:
 ## Alternatives
 
 - **Alloy** instead of TLA+: Alloy 6 supports temporal properties and is arguably more accessible. Rejected for now; TLA+ has broader adoption in distributed systems and is better documented for these property types.
-- **Property-based testing** instead of formal proofs: `proptest` (Rust) or `hypothesis` (Python) can cover many invariants. Useful at L3–L4 but insufficient for safety proofs under all interleavings. Not a substitute for L6.
+- **Property-based testing** instead of formal proofs: `proptest` (Rust) or `hypothesis` (Python) can cover many invariants. Useful at L3-L4 but insufficient for safety proofs under all interleavings. Not a substitute for L6.
 
 ---
 

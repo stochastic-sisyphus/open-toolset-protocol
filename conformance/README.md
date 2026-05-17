@@ -26,7 +26,7 @@ Current coverage:
 
 ## Running vectors
 
-An implementation passes a vector if, for each event in `sequence` (processed in order), the adapter produces the verdict specified in `verdict.json`. For L1 vectors the sequence is empty — only registry loading is checked.
+An implementation passes a vector if, for each event in `sequence` (processed in order), the adapter produces the verdict specified in `verdict.json`. For L1 vectors the sequence is empty - only registry loading is checked.
 
 The test harness is implementation-defined. A conformant implementation MUST pass all vectors for its claimed level before advertising that conformance claim.
 
@@ -36,6 +36,6 @@ To add a vector:
 
 1. Create a directory: `conformance/vectors/<LEVEL>/<LEVEL>-NNN-descriptive-name/`
 2. Add `toolsets.json`, `verdict.json`, and `notes.md` (see `vectors/README.md` for format)
-3. Open a PR — no RFC required for vectors that test existing behavior
+3. Open a PR - no RFC required for vectors that test existing behavior
 
 Vectors that expose gaps in the spec (behavior not currently defined) require an RFC.

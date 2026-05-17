@@ -34,8 +34,8 @@ Each entry in `tools` is an object with the following fields:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | REQUIRED | Unique name for this tool entry |
-| `phase` | string (enum) | REQUIRED | When in the GPS sequence this tool runs: `reconnaissance`, `surgery`, `instrumentation`, or `any` |
-| `category` | string | REQUIRED | What kind of tool this is. Open vocabulary — see canonical list below |
+| `phase` | string (enum) | REQUIRED | Phase this tool runs in: `reconnaissance`, `surgery`, `instrumentation`, or `any` |
+| `category` | string | REQUIRED | What kind of tool this is. Open vocabulary - see canonical list below |
 | `verification_mode` | string (enum) | REQUIRED | `deterministic`, `heuristic`, or `none` |
 | `description` | string | OPTIONAL | Human-readable description of this tool's purpose |
 | `binary_repo` | string | OPTIONAL | Upstream source URL for the tool binary |
@@ -46,7 +46,7 @@ Each entry in `tools` is an object with the following fields:
 
 ## Canonical category values
 
-The `category` field uses an open vocabulary — any string is valid. OATP publishes a canonical list maintained in RFC 0001. Current canonical values:
+The `category` field uses an open vocabulary - any string is valid. OATP publishes a canonical list maintained in RFC 0001. Current canonical values:
 
 | Category | Description |
 |---|---|
@@ -65,7 +65,7 @@ The `category` field uses an open vocabulary — any string is valid. OATP publi
 | `datalog-logic` | Datalog and logic programming tools |
 | `structural-edit` | AST-based structural editors |
 
-Categories let agents reason about substitution: "I need a `semantic-query` tool — any of CodeQL, Joern, or weggli will do." They also let toolsets advertise coverage gaps.
+Categories let agents reason about substitution: an agent that requires a `semantic-query` tool can select from CodeQL, Joern, or weggli without hardcoding a name. They also let toolsets advertise coverage gaps.
 
 ## Instrumented return object
 
@@ -76,7 +76,7 @@ Categories let agents reason about substitution: "I need a `semantic-query` tool
 
 ## Nested toolsets (self-registry)
 
-A toolset is recursive. `toolsets` is an array of objects that are themselves toolset definitions (same schema as the parent). This enables composition — a parent toolset can include sub-toolsets for organizational or phase separation.
+A toolset is recursive. `toolsets` is an array of objects that are themselves toolset definitions (same schema as the parent). This enables composition - a parent toolset can include sub-toolsets for organizational or phase separation.
 
 **Disambiguation**: if an entry has `phase` and `category`, it is a tool. If it has `toolset_name`, it is a nested toolset.
 
@@ -118,7 +118,7 @@ Then, after policies pass:
 
 6. `phase` gate: if `tool.phase` does not match `active_phase` and is not `"any"` → reject (exit 2, reason `phase_gate_violation`).
 7. `requires_prior`: if non-empty, scan phase trace for prior invocations matching any entry (name or `category:` prefix). If none match → reject (exit 2, reason `precondition_unsatisfied`).
-8. `requires_approval` check — pause and emit `tool.approval_requested` if true.
+8. `requires_approval` check - pause and emit `tool.approval_requested` if true.
 9. If all pass, allow.
 
 **Glob semantics**: `policies.allow` and `policies.deny` use git-style globbing. Patterns match against tool `name`, not against the command line. For command-line pattern matching, use `banned_patterns` (regex).
@@ -140,16 +140,16 @@ A `toolsets.json` may reference other registries using `$ref` entries in the `to
 ```
 
 `$ref` value forms:
-- **Relative path** — resolved against the referring file's directory
-- **Absolute path** — resolved directly
-- **`https://` URL** — fetched; MUST be HTTPS; MUST be a valid OATP registry
-- **`oatp:builtin/<name>`** — resolves against the adapter's embedded canonical registries (see `adapter/builtin/`)
+- **Relative path** - resolved against the referring file's directory
+- **Absolute path** - resolved directly
+- **`https://` URL** - fetched; MUST be HTTPS; MUST be a valid OATP registry
+- **`oatp:builtin/<name>`** - resolves against the adapter's embedded canonical registries (see `adapter/builtin/`)
 
-Resolution is **transitive** — `$ref`'d registries can themselves reference others. The adapter MUST detect cycles by tracking the resolution stack. A cycle causes exit 3, reason `registry_cycle`, with `cycle_path` listing the stack.
+Resolution is **transitive** - `$ref`'d registries can themselves reference others. The adapter MUST detect cycles by tracking the resolution stack. A cycle causes exit 3, reason `registry_cycle`, with `cycle_path` listing the stack.
 
 Merge semantics: each resolved registry's tools are flattened into the parent tool list. The parent's `capabilities` win on conflict. Each tool's `phase` and `category` are preserved from its source registry.
 
-Resolution is **depth-first, in declaration order** — identical inputs always produce identical resolved registries (deterministic).
+Resolution is **depth-first, in declaration order** - identical inputs always produce identical resolved registries (deterministic).
 
 ## Evaluation order (full)
 

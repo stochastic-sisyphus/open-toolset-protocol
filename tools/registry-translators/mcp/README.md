@@ -1,5 +1,5 @@
-# OATP adapter for MCP
+# MCP registry translator
 
-Reference adapter for the Model Context Protocol (MCP). Not yet implemented. See [RFC 0003](../../../RFC/0003-framework-adapters.md).
+Translator for the Model Context Protocol (MCP). Reads `tools/list` responses from MCP servers and emits a conformant `toolsets.json`. Not yet implemented. See [RFC 0003](../../RFC/0003-registry-translators.md).
 
-This integration will translate MCP `tools/list` responses into `toolsets.json` registry entries and intercept `tools/call` requests to apply OATP policy evaluation and phase gating before forwarding to the MCP server.
+This is a **one-shot translator**, not a runtime adapter. It does not intercept tool execution. Once it has written a valid `toolsets.json`, execution flows through the universal `oatp` binary at `adapter/`.

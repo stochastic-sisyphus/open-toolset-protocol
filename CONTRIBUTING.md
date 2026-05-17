@@ -12,7 +12,7 @@
 1. Copy [`RFC/0000-template.md`](RFC/0000-template.md) to `RFC/NNNN-short-title.md` (use the next available number)
 2. Fill in all sections: Summary, Motivation, Detailed design, Drawbacks, Alternatives, Unresolved questions
 3. Open a pull request
-4. Discussion happens in the PR — address feedback, revise the RFC
+4. Discussion happens in the PR - address feedback, revise the RFC
 5. Maintainers merge (accepted) or close with rationale (rejected)
 
 RFCs that change normative protocol semantics, JSON Schema fields, conformance requirements, or adapter exit codes MUST go through this process. Documentation-only changes do not require an RFC.

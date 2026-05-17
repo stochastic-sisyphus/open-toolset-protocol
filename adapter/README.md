@@ -1,6 +1,6 @@
-# oatp — OATP Reference Adapter
+# oatp - OATP Reference Adapter
 
-Reference implementation of the Open Toolset Protocol adapter in Rust.
+Reference implementation of the Open Toolset Protocol adapter in Rust. This is the sole reference adapter for OATP. Framework integrations live under `/tools/registry-translators/` - they emit `toolsets.json` from native framework registries but do NOT intercept execution.
 
 **Status: stub (v0.0.1).** Parses commands and prints what it would do. Full enforcement and instrumentation ships post-RFC.
 
@@ -113,13 +113,13 @@ Reference these from any `toolsets.json` via `$ref`:
 
 The adapter looks for `toolsets.json` in this order:
 
-1. `$OATP_TOOLSET` — explicit path or URL via environment variable
-2. `./toolsets.json` — project root
-3. `./.oatp/toolsets.json` — project dotdir
-4. `$XDG_CONFIG_HOME/oatp/toolsets.json` or `~/.config/oatp/toolsets.json` — user config
-5. `/etc/oatp/toolsets.json` — system config
-6. `https://<host>/.well-known/toolset.json` — remote discovery (only if `$OATP_REMOTE` is set)
-7. `oatp:builtin/safe-defaults` — embedded fallback (always available)
+1. `$OATP_TOOLSET` - explicit path or URL via environment variable
+2. `./toolsets.json` - project root
+3. `./.oatp/toolsets.json` - project dotdir
+4. `$XDG_CONFIG_HOME/oatp/toolsets.json` or `~/.config/oatp/toolsets.json` - user config
+5. `/etc/oatp/toolsets.json` - system config
+6. `https://<host>/.well-known/toolset.json` - remote discovery (only if `$OATP_REMOTE` is set)
+7. `oatp:builtin/safe-defaults` - embedded fallback (always available)
 
 ## Environment variables
 

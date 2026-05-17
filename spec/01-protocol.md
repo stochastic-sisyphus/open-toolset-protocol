@@ -57,7 +57,7 @@ If no registry is found, the Adapter MUST reject all invocations with exit code 
 For each invocation, the Adapter MUST:
 
 1. Identify the tool by matching `cmd` against the `tools[].command` field in the registry
-2. Check `policies.banned_patterns` — if the full command string matches any pattern, deny
+2. Check `policies.banned_patterns` - if the full command string matches any pattern, deny
 3. If the tool is found: check `args_pattern.allow` and `args_pattern.deny` regexes
 4. Check `cwd_constraint` against the actual working directory
 5. Check `path_allowlist` and `path_denylist` in policies
