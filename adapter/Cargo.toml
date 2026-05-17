@@ -1,0 +1,11 @@
+[package]
+name = "oatp"
+version = "0.0.1"
+edition = "2021"
+license = "Apache-2.0"
+description = "Reference adapter for the Open Toolset Protocol"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive"] }

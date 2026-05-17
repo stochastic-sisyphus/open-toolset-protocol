@@ -1,0 +1,26 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "version": "0.1",
+  "name": "minimal",
+  "description": "Smallest valid OATP registry. Allows read-only file search with rg, denies everything else.",
+  "tools": [
+    {
+      "id": "rg-search",
+      "command": "rg",
+      "description": "Read-only file search. No write flags permitted.",
+      "args_pattern": {
+        "deny": "--(write|replace|passthru)"
+      },
+      "timeout": 30
+    }
+  ],
+  "policies": {
+    "default_action": "deny",
+    "default_timeout": 30
+  },
+  "instrumentation": {
+    "trace_events": true,
+    "event_sink": "stdout",
+    "redact_secrets": false
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "title": "OATP Toolset Registry",
+  "description": "Schema for toolsets.json — the Open Toolset Protocol registry declaring allowed tools, policies, and instrumentation configuration.",
+  "type": "object",
+  "required": ["version", "name", "tools"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema URI for this document."
+    },
+    "version": {
+      "type": "string",
+      "description": "OATP spec version this registry targets. Format: '0.x'.",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for this toolset.",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of the toolset's purpose."
+    },
+    "tools": {
+      "type": "array",
+      "description": "Array of tool definitions.",
+      "items": {
+        "$ref": "#/$defs/tool"
+      }
+    },
+    "policies": {
+      "$ref": "#/$defs/policies"
+    },
+    "instrumentation": {
+      "$ref": "#/$defs/instrumentation"
+    },
+    "redaction": {
+      "$ref": "#/$defs/redaction"
+    }
+  },
+  "$defs": {
+    "tool": {
+      "type": "object",
+      "required": ["id", "command"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this tool entry.",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "description": "The binary or command name (e.g. 'rg', 'git').",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of this tool entry's purpose."
+        },
+        "args_pattern": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allow": {
+              "type": "string",
+              "description": "Regex. Full args string MUST match for the call to be allowed."
+            },
+            "deny": {
+              "type": "string",
+              "description": "Regex. If the full args string matches, the call is denied."
+            }
+          }
+        },
+        "cwd_constraint": {
+          "type": "string",
+          "description": "Regex. The invocation's working directory MUST match."
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Maximum execution time in seconds.",
+          "minimum": 1
+        },
+        "requires_approval": {
+          "type": "boolean",
+          "description": "If true, invocation is paused pending external approval."
+        },
+        "instrumentation_overrides": {
+          "type": "object",
+          "description": "Per-tool overrides for instrumentation fields.",
+          "additionalProperties": false,
+          "properties": {
+            "trace_events": {
+              "type": "boolean"
+            },
+            "event_sink": {
+              "type": "string"
+            },
+            "redact_secrets": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default_action": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "description": "Action for invocations that match no tool entry. Default: 'deny'."
+        },
+        "default_timeout": {
+          "type": "integer",
+          "description": "Default timeout in seconds for all tools unless overridden.",
+          "minimum": 1
+        },
+        "banned_patterns": {
+          "type": "array",
+          "description": "Regex patterns matched against full command string. Any match causes immediate denial.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "path_allowlist": {
+          "type": "array",
+          "description": "Glob patterns. File path arguments MUST match at least one entry if this list is non-empty.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "path_denylist": {
+          "type": "array",
+          "description": "Glob patterns. File path arguments MUST NOT match any entry.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "instrumentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trace_events": {
+          "type": "boolean",
+          "description": "Emit trace events. Default: true."
+        },
+        "event_sink": {
+          "type": "string",
+          "description": "Where to emit events: 'stdout', 'stderr', a file path, or an HTTP URL. Default: 'stdout'."
+        },
+        "redact_secrets": {
+          "type": "boolean",
+          "description": "Apply redaction rules before returning stdout/stderr. Default: false."
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "regex"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Identifier for this redaction rule.",
+                "minLength": 1
+              },
+              "regex": {
+                "type": "string",
+                "description": "Pattern to match in stdout/stderr."
+              },
+              "replacement": {
+                "type": "string",
+                "description": "Replacement text. Default: '[REDACTED]'."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

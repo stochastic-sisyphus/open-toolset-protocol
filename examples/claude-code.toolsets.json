@@ -1,0 +1,89 @@
+{
+  "$schema": "https://open-toolset-protocol.org/schemas/toolsets.schema.json",
+  "version": "0.1",
+  "name": "claude-code-default",
+  "description": "OATP toolset for Claude Code. Allows structural code search, read-only git, and mise. Bans package manager global installs.",
+  "tools": [
+    {
+      "id": "sg-search",
+      "command": "sg",
+      "description": "ast-grep structural code search and pattern matching.",
+      "timeout": 60
+    },
+    {
+      "id": "qi-search",
+      "command": "qi",
+      "description": "Natural language code search.",
+      "timeout": 60
+    },
+    {
+      "id": "rg-search",
+      "command": "rg",
+      "description": "Ripgrep file search. Filesystem path lookup only, not code analysis.",
+      "args_pattern": {
+        "deny": "--(write|replace|passthru)"
+      },
+      "timeout": 30
+    },
+    {
+      "id": "git-read",
+      "command": "git",
+      "description": "Read-only git operations: status, diff, log, show, blame.",
+      "args_pattern": {
+        "allow": "^(status|diff|log|show|blame|branch|remote|tag|stash list|shortlog|describe|rev-parse|ls-files|ls-tree)(\\s|$)"
+      },
+      "timeout": 30
+    },
+    {
+      "id": "mise-run",
+      "command": "mise",
+      "description": "mise task runner and tool version manager.",
+      "args_pattern": {
+        "deny": "--(global|system)"
+      },
+      "timeout": 120
+    },
+    {
+      "id": "cymbal",
+      "command": "cymbal",
+      "description": "Code navigation, symbol index, call graphs, impact analysis.",
+      "timeout": 60
+    }
+  ],
+  "policies": {
+    "default_action": "deny",
+    "default_timeout": 60,
+    "banned_patterns": [
+      "npm\\s+(install|i)\\s+-g",
+      "npm\\s+(install|i)\\s+--global",
+      "pip\\s+install(?!\\s+--requirement|\\s+-r)",
+      "pip3\\s+install",
+      "brew\\s+install",
+      "brew\\s+upgrade",
+      "cargo\\s+install",
+      "gem\\s+install",
+      "go\\s+install",
+      "sudo\\s+",
+      "rm\\s+-rf\\s+/"
+    ]
+  },
+  "instrumentation": {
+    "trace_events": true,
+    "event_sink": "~/.local/share/oatp/claude-code.jsonl",
+    "redact_secrets": true
+  },
+  "redaction": {
+    "patterns": [
+      {
+        "name": "api-key",
+        "regex": "(sk-|ghp_|gho_|xoxb-|AKIA)[A-Za-z0-9_\\-]{16,}",
+        "replacement": "[REDACTED:api-key]"
+      },
+      {
+        "name": "env-secret",
+        "regex": "(?i)(password|secret|token|api_key)\\s*=\\s*\\S+",
+        "replacement": "[REDACTED:secret]"
+      }
+    ]
+  }
+}
