@@ -49,7 +49,7 @@ conformance/vectors/
 
 | Code | Meaning |
 |---|---|
-| 0 | Accepted — command executed successfully |
+| 0 | Accepted - command executed successfully |
 | 2 | Policy rejection: denylist, default_deny, phase gate, precondition, banned pattern |
 | 3 | Schema error: registry failed JSON Schema validation |
 | 4 | Registry not found |

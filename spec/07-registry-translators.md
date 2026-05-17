@@ -26,7 +26,7 @@ Pydantic AI ([docs](https://pydantic.dev/docs/ai/tools-toolsets/toolsets/)) prov
 Translation sketch (conceptual - not normative):
 
 ```python
-# Conceptual — not normative
+# Conceptual - not normative
 from pydantic_ai.tools import FunctionToolset
 import json
 
@@ -54,7 +54,7 @@ def to_oatp(toolset: FunctionToolset, *, phase: str, category: str) -> dict:
         ],
     }
 
-# Emit and exit — do not intercept execution
+# Emit and exit - do not intercept execution
 print(json.dumps(to_oatp(my_toolset, phase="reconnaissance", category="navigation")))
 ```
 
@@ -89,7 +89,7 @@ An MCP tools/list response looks like:
 Translation to OATP (emit and exit - not normative):
 
 ```python
-# Conceptual — not normative
+# Conceptual - not normative
 import json
 
 def mcp_tools_to_oatp(tools_list_response: dict, *, phase: str) -> dict:
@@ -118,7 +118,7 @@ def mcp_tools_to_oatp(tools_list_response: dict, *, phase: str) -> dict:
         "tools": tools,
     }
 
-# Emit and exit — do not intercept tools/call
+# Emit and exit - do not intercept tools/call
 print(json.dumps(mcp_tools_to_oatp(response, phase="reconnaissance")))
 ```
 
